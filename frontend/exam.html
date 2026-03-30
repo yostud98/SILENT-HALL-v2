@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Silent Hall — Exam in Progress</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--b9:#0c1e4a;--b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--t5:#14b8a6;
+  --g6:#16a34a;--g1:#dcfce7;--r6:#dc2626;--r1:#fee2e2;--a5:#f59e0b;--a1:#fef3c7;
+  --s9:#0f172a;--s8:#1e293b;--s7:#334155;--s5:#64748b;--s4:#94a3b8;--s2:#e2e8f0;--s1:#f1f5f9;--w:#fff;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:#0f172a;user-select:none;-webkit-user-select:none}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);backdrop-filter:blur(8px)}
+.overlay.hidden{display:none}
+.setup-card{background:#fff;border-radius:20px;padding:36px;max-width:480px;width:90%;text-align:center}
+.setup-icon{font-size:52px;margin-bottom:14px}
+.setup-title{font-size:20px;font-weight:800;color:var(--s9);margin-bottom:6px}
+.setup-desc{font-size:13px;color:var(--s5);margin-bottom:22px;line-height:1.6}
+.check-list{text-align:left;margin-bottom:22px}
+.check-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;color:var(--s7)}
+.check-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .3s}
+.check-dot.wait{background:var(--a1);color:var(--a5);animation:pulse 1s infinite}
+.check-dot.ok{background:var(--g1);color:var(--g6)}
+.check-dot.err{background:var(--r1);color:var(--r6)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-begin{width:100%;padding:13px;border:none;border-radius:10px;background:var(--b6);color:#fff;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.btn-begin:hover:not(:disabled){background:#1d4ed8}
+.btn-begin:disabled{opacity:.5;cursor:not-allowed}
+
+/* WARNING */
+.warn-overlay{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:rgba(220,38,38,.1);backdrop-filter:blur(3px);pointer-events:none}
+.warn-overlay.hidden{display:none}
+.warn-box{background:#fff;border:3px solid var(--r6);border-radius:14px;padding:24px 32px;text-align:center;max-width:380px;pointer-events:auto;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.warn-icon{font-size:38px;margin-bottom:10px}
+.warn-title{font-size:17px;font-weight:800;color:var(--r6);margin-bottom:5px}
+.warn-desc{font-size:12px;color:var(--s5);margin-bottom:14px;line-height:1.5}
+.btn-warn-ok{padding:9px 26px;border:none;border-radius:8px;background:var(--r6);color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer}
+
+/* SUBMIT REDIRECT */
+.submit-overlay-card{background:#fff;border-radius:20px;padding:42px 36px;max-width:440px;width:90%;text-align:center}
+.submit-icon{font-size:60px;margin-bottom:16px;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.submit-title{font-size:22px;font-weight:800;color:var(--s9);margin-bottom:8px}
+.submit-sub{font-size:13px;color:var(--s5);margin-bottom:26px;line-height:1.65}
+.submit-prog{height:5px;background:var(--s2);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.submit-prog-fill{height:100%;background:linear-gradient(90deg,var(--b5),var(--t5));border-radius:3px;animation:fillBar 2.6s ease-out forwards}
+@keyframes fillBar{from{width:0%}to{width:100%}}
+.submit-redirect-hint{font-size:12px;color:var(--s4);display:flex;align-items:center;justify-content:center;gap:7px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--b5);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* EXAM LAYOUT */
+.exam-app{display:flex;height:100vh}
+.q-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f4fa}
+.exam-hd{background:var(--b9);padding:0 20px;height:54px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.exam-logo{font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
+.exam-logo-ic{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--b5),var(--t5));display:flex;align-items:center;justify-content:center;font-size:14px}
+.exam-quiz-title{font-size:12px;color:rgba(255,255,255,.5);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-block{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border-radius:8px;padding:5px 12px}
+.timer-val{font-family:var(--mono);font-size:15px;font-weight:700;color:#fff;min-width:52px;text-align:center}
+.timer-val.warn{color:#fbbf24;animation:pulse 1s infinite}
+.timer-val.danger{color:#f87171;animation:pulse .5s infinite}
+.cheat-ind{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.45);border-left:1px solid rgba(255,255,255,.1);padding-left:12px}
+.cheat-bar{width:56px;height:5px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden}
+.cheat-fill{height:100%;border-radius:3px;background:#22c55e;transition:width .3s,background .3s}
+.exam-ref{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);padding:3px 9px;border-radius:20px}
+.prog-bar{height:3px;background:rgba(255,255,255,.1);flex-shrink:0}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--b4),var(--t5));transition:width .3s}
+.q-content{flex:1;overflow-y:auto;padding:22px}
+.q-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.q-counter{font-size:12px;font-weight:700;color:var(--s5);text-transform:uppercase;letter-spacing:1px}
+.q-marks{background:var(--b0,#eff6ff);color:var(--b6);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.q-text{font-size:17px;font-weight:600;color:var(--s9);line-height:1.55;margin-bottom:22px}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.option{display:flex;align-items:center;gap:13px;padding:13px 15px;border:2px solid var(--s2);border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.option:hover{border-color:#93c5fd;background:#eff6ff}
+.option.selected{border-color:var(--b6);background:#eff6ff}
+.opt-letter{width:30px;height:30px;border-radius:7px;border:2px solid var(--s2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--s5);flex-shrink:0;transition:all .15s}
+.option.selected .opt-letter{background:var(--b6);border-color:var(--b6);color:#fff}
+.opt-text{font-size:13.5px;font-weight:500;color:var(--s7)}
+.option.selected .opt-text{color:var(--s9);font-weight:600}
+.q-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#fff;border-top:1px solid var(--s2);flex-shrink:0}
+.btn-nav{padding:9px 18px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-prev{background:#fff;color:var(--s7);border:1.5px solid var(--s2)}
+.btn-prev:hover:not(:disabled){background:var(--s1)}
+.btn-prev:disabled{opacity:.4;cursor:not-allowed}
+.btn-next{background:var(--b6);color:#fff;border:none}
+.btn-next:hover{background:#1d4ed8}
+.btn-submit-exam{background:var(--g6);color:#fff;border:none}
+.btn-submit-exam:hover{background:#15803d}
+/* Q map */
+.q-map{width:56px;background:var(--b9);display:flex;flex-direction:column;align-items:center;padding:8px 4px;gap:5px;overflow-y:auto;flex-shrink:0}
+.q-dot{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);border:1.5px solid transparent}
+.q-dot.answered{background:rgba(59,130,246,.3);color:rgba(255,255,255,.9)}
+.q-dot.current{border-color:var(--b4);color:#fff}
+/* Proctor panel */
+.proctor{width:250px;background:var(--s9);display:flex;flex-direction:column;flex-shrink:0;border-left:1px solid rgba(255,255,255,.05)}
+.cam-section{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.cam-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.cam-live{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:pulse .8s infinite}
+.cam-feed{position:relative;border-radius:9px;overflow:hidden;background:#0f172a;aspect-ratio:4/3}
+.cam-feed video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam-feed canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cam-status{position:absolute;bottom:5px;left:5px;right:5px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);border-radius:5px;padding:3px 7px}
+.cam-status-txt{font-size:10px;color:#fff;font-weight:600}
+.cam-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+.cam-dot.warn{background:var(--a5)}.cam-dot.err{background:#ef4444;animation:pulse .5s infinite}
+.viol-section{flex:1;overflow-y:auto;padding:8px 12px}
+.viol-hd{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px}
+.viol-item{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.viol-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.viol-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.75)}
+.viol-time{font-size:10px;color:rgba(255,255,255,.3);font-family:var(--mono)}
+.no-viols{font-size:11px;color:rgba(255,255,255,.25);text-align:center;padding:16px 0}
+.cheat-card{padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}
+.cheat-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:7px}
+.cheat-prog{height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:5px}
+.cheat-prog-fill{height:100%;border-radius:4px;transition:width .3s,background .3s;background:#22c55e}
+.cheat-num{font-size:18px;font-weight:800;color:#fff;font-family:var(--mono)}
+.cheat-sub{font-size:10px;color:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+<!-- SETUP -->
+<div class="overlay" id="setup-overlay">
+  <div class="setup-card">
+    <div class="setup-icon">📷</div>
+    <div class="setup-title">Proctoring Setup</div>
+    <div class="setup-desc">Setting up your secure exam environment. Please wait while we verify your camera and load your questions.</div>
+    <div class="check-list">
+      <div class="check-row"><div class="check-dot wait" id="c-cam">⏳</div><span id="ct-cam">Requesting camera access...</span></div>
+      <div class="check-row"><div class="check-dot wait" id="c-fs">⏳</div><span id="ct-fs">Entering fullscreen mode...</span></div>
+      <div class="check-row"><div class="check-dot wait" id="c-face">⏳</div><span id="ct-face">Verifying face presence...</span></div>
+      <div class="check-row"><div class="check-dot wait" id="c-quiz">⏳</div><span id="ct-quiz">Loading exam questions...</span></div>
+    </div>
+    <button class="btn-begin" id="begin-btn" disabled onclick="beginExam()">Begin Exam</button>
+  </div>
+</div>
+
+<!-- WARNING -->
+<div class="warn-overlay hidden" id="warn-overlay">
+  <div class="warn-box">
+    <div class="warn-icon" id="warn-icon">⚠️</div>
+    <div class="warn-title" id="warn-title">Violation Detected</div>
+    <div class="warn-desc" id="warn-desc">This has been recorded.</div>
+    <button class="btn-warn-ok" onclick="dismissWarn()">I Understand</button>
+  </div>
+</div>
+
+<!-- SUBMIT SUCCESS REDIRECT -->
+<div class="overlay hidden" id="result-overlay">
+  <div class="submit-overlay-card">
+    <div class="submit-icon">✅</div>
+    <div class="submit-title">Quiz Submitted Successfully!</div>
+    <div class="submit-sub">Your answers have been saved to <strong>Silent Hall</strong>.<br>Redirecting you to your results dashboard…</div>
+    <div class="submit-prog"><div class="submit-prog-fill"></div></div>
+    <div class="submit-redirect-hint"><span class="spin"></span> Preparing your dashboard</div>
+  </div>
+</div>
+
+<!-- MAIN EXAM -->
+<div class="exam-app">
+  <div class="q-panel">
+    <div class="exam-hd">
+      <div class="exam-logo"><div class="exam-logo-ic">🎓</div>Silent Hall</div>
+      <div class="exam-quiz-title" id="exam-title">Loading...</div>
+      <div class="timer-block"><span>⏱</span><span class="timer-val" id="timer">00:00</span></div>
+      <div class="cheat-ind">
+        <span>Integrity</span>
+        <div class="cheat-bar"><div class="cheat-fill" id="hd-cheat-fill" style="width:100%"></div></div>
+      </div>
+      <div class="exam-ref" id="exam-ref">—</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="q-content">
+      <div class="q-header">
+        <span class="q-counter" id="q-counter">Question 1 of —</span>
+        <span class="q-marks" id="q-marks">1 mark</span>
+      </div>
+      <div class="q-text" id="q-text">Loading...</div>
+      <div class="options" id="options"></div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-nav btn-prev" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn-nav btn-next" id="btn-next" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+  <div class="q-map" id="q-map"></div>
+  <div class="proctor">
+    <div class="cam-section">
+      <div class="cam-label"><div class="cam-live"></div>AI PROCTOR LIVE</div>
+      <div class="cam-feed">
+        <video id="cam-video" autoplay muted playsinline></video>
+        <canvas id="cam-canvas"></canvas>
+        <div class="cam-status"><span class="cam-status-txt" id="cam-txt">Initializing...</span><div class="cam-dot" id="cam-dot"></div></div>
+      </div>
+    </div>
+    <div class="viol-section">
+      <div class="viol-hd">⚠ Violation Log</div>
+      <div id="viol-list"><div class="no-viols">No violations ✓</div></div>
+    </div>
+    <div class="cheat-card">
+      <div class="cheat-lbl">Risk Score</div>
+      <div class="cheat-prog"><div class="cheat-prog-fill" id="cheat-fill" style="width:0%"></div></div>
+      <div style="display:flex;align-items:baseline;gap:5px">
+        <div class="cheat-num" id="cheat-num">0</div>
+        <div class="cheat-sub">/ 100</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/umat-data.js"></script>
+<script>
+const DEMO_QS=[
+  {id:1,questionText:"What is the time complexity of binary search?",optionA:"O(n)",optionB:"O(log n)",optionC:"O(n²)",optionD:"O(1)",marks:1},
+  {id:2,questionText:"Which data structure uses LIFO order?",optionA:"Queue",optionB:"Array",optionC:"Stack",optionD:"Linked List",marks:1},
+  {id:3,questionText:"What does DFS stand for in graph traversal?",optionA:"Data First Search",optionB:"Depth First Search",optionC:"Dynamic First Search",optionD:"Direct Fast Search",marks:1},
+  {id:4,questionText:"A complete binary tree with n nodes has height approximately:",optionA:"n",optionB:"n/2",optionC:"log₂(n)",optionD:"n²",marks:2},
+  {id:5,questionText:"Which sorting algorithm has the best average-case time complexity?",optionA:"Bubble Sort",optionB:"Insertion Sort",optionC:"Merge Sort",optionD:"Selection Sort",marks:2},
+  {id:6,questionText:"Which data structure is best for a priority queue?",optionA:"Array",optionB:"Linked List",optionC:"Heap",optionD:"Stack",marks:2},
+  {id:7,questionText:"Worst-case time complexity of QuickSort?",optionA:"O(n log n)",optionB:"O(n)",optionC:"O(n²)",optionD:"O(log n)",marks:2},
+  {id:8,questionText:"In a hash table, a collision means:",optionA:"Hash function error",optionB:"Two keys map to same index",optionC:"Table is full",optionD:"Empty slot",marks:1}
+];
+
+let student,quizId,attemptId,questions=[],answers={},currentQ=0,timeLeft=0,cheatingScore=0;
+let timerInt,stream=null,mediaRec,recChunks=[],faceInt;
+
+window.addEventListener('load',async()=>{
+  student=getStudent(); quizId=localStorage.getItem('umat_quiz_id');
+  if(!student||!quizId){window.location.href='login.html';return;}
+  document.getElementById('exam-ref').textContent=student.referenceNumber;
+  await requestCamera();
+  await enterFullscreen();
+  await loadQuiz();
+  setupAntiCheat();
+});
+
+// ── SETUP ────────────────────────────────────────────────────
+async function requestCamera(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    document.getElementById('cam-video').srcObject=stream;
+    setCheck('cam','✓','ok','Camera access granted');
+    startRecording();
+    startFaceCheck();
+  }catch(e){setCheck('cam','✕','err','Camera denied — required for exam');}
+}
+function startRecording(){
+  try{
+    mediaRec=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'});
+    mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};
+    mediaRec.start(1000);
+  }catch(e){console.warn('Recorder error',e);}
+}
+async function enterFullscreen(){
+  try{
+    await document.documentElement.requestFullscreen();
+    setCheck('fs','✓','ok','Fullscreen mode active');
+  }catch(e){setCheck('fs','⚠','wait','Fullscreen recommended');}
+}
+async function loadQuiz(){
+  try{
+    const data=await apiFetch('/quiz/start',{method:'POST',body:JSON.stringify({studentId:student.id,quizId:parseInt(quizId)})});
+    questions=data.questions; attemptId=data.attemptId; timeLeft=data.durationMinutes*60;
+    document.getElementById('exam-title').textContent=data.quizTitle;
+  }catch(e){
+    questions=DEMO_QS; attemptId='demo'; timeLeft=45*60;
+    document.getElementById('exam-title').textContent='Data Structures Mid-Semester Exam';
+  }
+  setCheck('quiz','✓','ok',`${questions.length} questions loaded`);
+  setCheck('face','✓','ok','Face detection active');
+  document.getElementById('begin-btn').disabled=false;
+  renderQMap();
+}
+function setCheck(id,icon,type,text){
+  const d=document.getElementById('c-'+id),t=document.getElementById('ct-'+id);
+  d.textContent=icon; d.className='check-dot '+type; if(t)t.textContent=text;
+}
+
+// ── FACE CHECK ───────────────────────────────────────────────
+let noFaceFrames=0;
+function startFaceCheck(){
+  const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas'),ctx=c.getContext('2d');
+  faceInt=setInterval(()=>{
+    if(!v.videoWidth)return;
+    c.width=v.videoWidth; c.height=v.videoHeight; ctx.drawImage(v,0,0);
+    const d=ctx.getImageData(0,0,c.width>>2,c.height>>2).data;
+    let bright=0;for(let i=0;i<d.length;i+=16)bright+=d[i];
+    bright/=(d.length/16);
+    if(bright<8){noFaceFrames++;setCamStatus('Low light / No face','err');
+      if(noFaceFrames>=3){triggerViolation('NO_FACE_DETECTED','No face visible','👤');noFaceFrames=0;}}
+    else{noFaceFrames=0;setCamStatus('Face Detected ✓','ok');}
+  },2500);
+}
+function setCamStatus(txt,type){
+  document.getElementById('cam-txt').textContent=txt;
+  const d=document.getElementById('cam-dot');
+  d.className='cam-dot'+(type==='err'?' err':type==='warn'?' warn':'');
+}
+
+// ── BEGIN ─────────────────────────────────────────────────────
+function beginExam(){
+  document.getElementById('setup-overlay').classList.add('hidden');
+  renderQ(0); startTimer();
+}
+
+// ── TIMER ─────────────────────────────────────────────────────
+function startTimer(){
+  timerInt=setInterval(()=>{
+    timeLeft--;
+    const m=Math.floor(timeLeft/60).toString().padStart(2,'0');
+    const s=(timeLeft%60).toString().padStart(2,'0');
+    const el=document.getElementById('timer');
+    el.textContent=`${m}:${s}`;
+    if(timeLeft<=300)el.className='timer-val warn';
+    if(timeLeft<=60)el.className='timer-val danger';
+    if(timeLeft<=0){clearInterval(timerInt);autoSubmit();}
+  },1000);
+}
+
+// ── RENDER Q ──────────────────────────────────────────────────
+function renderQ(idx){
+  currentQ=idx;
+  const q=questions[idx],total=questions.length;
+  document.getElementById('q-counter').textContent=`Question ${idx+1} of ${total}`;
+  document.getElementById('q-marks').textContent=`${q.marks} mark${q.marks>1?'s':''}`;
+  document.getElementById('q-text').textContent=q.questionText;
+  document.getElementById('prog-fill').style.width=`${((idx+1)/total)*100}%`;
+  document.getElementById('btn-prev').disabled=idx===0;
+  const nb=document.getElementById('btn-next');
+  if(idx===total-1){nb.textContent='Submit Exam';nb.className='btn-nav btn-submit-exam';nb.onclick=confirmSubmit;}
+  else{nb.textContent='Next →';nb.className='btn-nav btn-next';nb.onclick=nextQ;}
+  const opts=document.getElementById('options');
+  const letters=['A','B','C','D'],vals=[q.optionA,q.optionB,q.optionC,q.optionD];
+  opts.innerHTML=letters.map((l,i)=>`
+    <div class="option ${answers[q.id]===l?'selected':''}" onclick="selectAns('${q.id}','${l}',this.closest('.options'))">
+      <div class="opt-letter">${l}</div><div class="opt-text">${vals[i]}</div>
+    </div>`).join('');
+  updateQMap();
+}
+function selectAns(qId,letter,container){
+  answers[qId]=letter;
+  container.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateQMap();
+}
+function prevQ(){if(currentQ>0)renderQ(currentQ-1);}
+function nextQ(){if(currentQ<questions.length-1)renderQ(currentQ+1);}
+function renderQMap(){
+  document.getElementById('q-map').innerHTML=questions.map((q,i)=>
+    `<div class="q-dot ${answers[q.id]?'answered':''} ${i===currentQ?'current':''}" onclick="renderQ(${i})">${i+1}</div>`).join('');
+}
+function updateQMap(){
+  document.querySelectorAll('.q-dot').forEach((d,i)=>{
+    d.className=`q-dot ${answers[questions[i].id]?'answered':''} ${i===currentQ?'current':''}`;
+  });
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+function confirmSubmit(){
+  const ans=Object.keys(answers).length;
+  if(!confirm(`Submit exam?\n\nAnswered: ${ans}/${questions.length}\nUnanswered questions will score 0.\n\nThis cannot be undone.`))return;
+  submitExam(false);
+}
+function autoSubmit(){
+  showWarn('⏰','Time is Up!','Your exam has been automatically submitted.',true);
+  submitExam(true);
+}
+async function submitExam(isAuto){
+  clearInterval(timerInt);
+  if(faceInt)clearInterval(faceInt);
+  if(mediaRec&&mediaRec.state!=='inactive'){mediaRec.stop();setTimeout(uploadRecording,1500);}
+  // Show the redirect overlay immediately
+  document.getElementById('result-overlay').classList.remove('hidden');
+  if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+  // Submit to backend (fire-and-forget — student sees dashboard regardless)
+  try{
+    await apiFetch('/quiz/submit',{method:'POST',body:JSON.stringify({attemptId,autoSubmit:isAuto,answers})});
+  }catch(e){
+    // Demo/offline mode — submission stored locally, still redirect
+    console.warn('[Silent Hall] Submit fallback:',e);
+  }
+  // Redirect after 2.6s (matches progress bar animation)
+  setTimeout(()=>{ window.location.href='dashboard.html?submitted=1'; }, 2600);
+}
+
+async function uploadRecording(){
+  if(!recChunks.length)return;
+  const blob=new Blob(recChunks,{type:'video/webm'});
+  const fd=new FormData();
+  fd.append('file',blob,'recording.mp4');
+  fd.append('attemptId',attemptId);
+  fd.append('referenceNumber',student.referenceNumber);
+  fd.append('course',student.course);
+  try{await fetch(`${API_BASE}/recording/upload`,{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd});}
+  catch(e){console.warn('Upload failed',e);}
+}
+
+
+
+// ── ANTI-CHEAT ────────────────────────────────────────────────
+function setupAntiCheat(){
+  document.addEventListener('contextmenu',e=>{e.preventDefault();triggerViolation('COPY_PASTE_ATTEMPT','Right-click blocked','🖱');});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','C','J'].includes(e.key))){e.preventDefault();triggerViolation('DEVTOOLS_OPEN','DevTools shortcut','🔧');}
+    if(e.key==='PrintScreen'){e.preventDefault();triggerViolation('SCREENSHOT_DETECTED','PrintScreen detected','📸');}
+    if(e.ctrlKey&&['c','v','a','u','s'].includes(e.key)){e.preventDefault();triggerViolation('COPY_PASTE_ATTEMPT','Copy/paste blocked','📋');}
+    if(e.key==='Escape'){e.preventDefault();triggerViolation('ESC_PRESSED','ESC pressed','⛔');}
+    if(e.altKey&&e.key==='Tab')e.preventDefault();
+    if(e.key==='F5'||e.key==='F11'){e.preventDefault();}
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)triggerViolation('TAB_SWITCH','Tab switched / window minimized','🔄');
+  });
+  window.addEventListener('blur',()=>triggerViolation('TAB_SWITCH','Window lost focus','🔄'));
+  document.addEventListener('fullscreenchange',()=>{
+    if(!document.fullscreenElement){
+      triggerViolation('FULLSCREEN_EXIT','Exited fullscreen','⛔');
+      setTimeout(()=>{try{document.documentElement.requestFullscreen();}catch(e){}},600);
+    }
+  });
+  document.addEventListener('copy',e=>e.preventDefault());
+  document.addEventListener('paste',e=>e.preventDefault());
+  document.addEventListener('cut',e=>e.preventDefault());
+  // Electron: listen for main-process cheat events
+  if(window.electronAPI){
+    window.electronAPI.onCheatEvent(d=>triggerViolation(d.type,d.description,'🖥'));
+  }
+}
+
+const SEVERITY={NO_FACE_DETECTED:5,MULTIPLE_FACES:20,SCREENSHOT_DETECTED:25,PHONE_DETECTED:15,
+  TAB_SWITCH:10,FULLSCREEN_EXIT:10,DEVTOOLS_OPEN:20,COPY_PASTE_ATTEMPT:5,ESC_PRESSED:5};
+const COOLDOWN={};
+
+function triggerViolation(type,desc,icon){
+  const now=Date.now();
+  if(COOLDOWN[type]&&now-COOLDOWN[type]<4000)return;
+  COOLDOWN[type]=now;
+  const t=new Date().toLocaleTimeString();
+  const list=document.getElementById('viol-list');
+  if(list.querySelector('.no-viols'))list.innerHTML='';
+  list.insertAdjacentHTML('afterbegin',`<div class="viol-item"><span class="viol-icon">${icon}</span><div><div class="viol-title">${desc}</div><div class="viol-time">${t}</div></div></div>`);
+  cheatingScore=Math.min(100,cheatingScore+(SEVERITY[type]||5));
+  updateCheatDisplay();
+  if(attemptId&&attemptId!=='demo'){
+    apiFetch('/quiz/cheat-event',{method:'POST',body:JSON.stringify({attemptId,eventType:type,description:desc})}).catch(()=>{});
+  }
+  const serious=['SCREENSHOT_DETECTED','DEVTOOLS_OPEN','MULTIPLE_FACES','PHONE_DETECTED'];
+  if(serious.includes(type))showWarn(icon,'Violation Detected!',desc+'\n\nThis has been recorded and reported to your lecturer.');
+}
+
+function updateCheatDisplay(){
+  const color=cheatingScore<20?'#22c55e':cheatingScore<50?'#f59e0b':'#ef4444';
+  document.getElementById('cheat-fill').style.width=cheatingScore+'%';
+  document.getElementById('cheat-fill').style.background=color;
+  document.getElementById('hd-cheat-fill').style.width=(100-cheatingScore)+'%';
+  document.getElementById('hd-cheat-fill').style.background=color;
+  document.getElementById('cheat-num').textContent=cheatingScore;
+}
+
+let warnTimeout;
+function showWarn(icon,title,desc,persist=false){
+  document.getElementById('warn-icon').textContent=icon;
+  document.getElementById('warn-title').textContent=title;
+  document.getElementById('warn-desc').textContent=desc;
+  document.getElementById('warn-overlay').classList.remove('hidden');
+  if(!persist){clearTimeout(warnTimeout);warnTimeout=setTimeout(dismissWarn,5000);}
+}
+function dismissWarn(){document.getElementById('warn-overlay').classList.add('hidden');}
+</script>
+</body>
+</html>

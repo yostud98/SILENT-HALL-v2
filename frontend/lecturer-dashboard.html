@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Silent Hall — — Lecturer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--b9:#0c1e4a;--b7:#1e4db7;--b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--b1:#dbeafe;--b0:#eff6ff;
+  --t6:#0d9488;--t5:#14b8a6;--t1:#ccfbf1;--g6:#16a34a;--g1:#dcfce7;
+  --r6:#dc2626;--r1:#fee2e2;--a5:#f59e0b;--a1:#fef3c7;
+  --s9:#0f172a;--s8:#1e293b;--s7:#334155;--s6:#475569;--s5:#64748b;--s4:#94a3b8;
+  --s2:#e2e8f0;--s1:#f1f5f9;--s0:#f8fafc;--w:#fff;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+  --sh:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:#e8eef7;color:var(--s8);font-size:14px;min-height:100vh}
+.app{display:flex;min-height:100vh}
+.sb{width:230px;background:var(--b9);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:13px;font-weight:800;color:#fff}.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.5px}
+.sb-profile{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.sb-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.sb-name{font-size:12px;font-weight:700;color:#fff}.sb-role{font-size:10px;color:rgba(255,255,255,.4)}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.25);padding:10px 18px 4px;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.sb-item.active{background:rgba(124,58,237,.2);color:#fff;border-left-color:#a78bfa}
+.sb-badge{margin-left:auto;background:var(--r6);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px}
+.sb-badge.blue{background:var(--b6)}
+.sb-bottom{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-logout{width:100%;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.6);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.sb-logout:hover{background:rgba(255,255,255,.08);color:#fff}
+.main{flex:1;margin-left:230px;display:flex;flex-direction:column}
+.topbar{height:56px;background:var(--w);border-bottom:1px solid var(--s2);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:16px;font-weight:700;color:var(--s9);flex:1}
+.tbar-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--s2);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;background:#fff;position:relative}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--r6);border:1.5px solid #fff}
+.content{flex:1;padding:24px}
+.section{display:none}.section.active{display:block}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:1200px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.stat-card{background:var(--w);border-radius:14px;box-shadow:var(--sh);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.stat-icon.blue{background:var(--b0)}.stat-icon.green{background:var(--g1)}.stat-icon.amber{background:var(--a1)}.stat-icon.red{background:var(--r1)}.stat-icon.purple{background:#ede9fe}
+.stat-num{font-size:26px;font-weight:800;color:var(--s9);line-height:1}
+.stat-lbl{font-size:12px;color:var(--s5);font-weight:500}
+.card{background:var(--w);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.card-hd{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13.5px;font-weight:700;color:var(--s9)}
+.card-sub{font-size:12px;color:var(--s5);margin-top:1px}
+.card-body{padding:0 20px 18px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge-pass{background:var(--g1);color:var(--g6)}.badge-fail{background:var(--r1);color:var(--r6)}.badge-warn{background:var(--a1);color:#b45309}.badge-info{background:var(--b1);color:var(--b7)}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-size:13px;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all .15s;padding:8px 14px}
+.btn-primary{background:var(--b6);color:#fff}.btn-primary:hover{background:var(--b7)}
+.btn-purple{background:#7c3aed;color:#fff}.btn-purple:hover{background:#6d28d9}
+.btn-success{background:var(--g6);color:#fff}.btn-success:hover{background:#15803d}
+.btn-outline{background:#fff;color:var(--s7);border:1.5px solid var(--s2)}.btn-outline:hover{background:var(--s0)}
+.btn-danger{background:var(--r6);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:6px 12px;font-size:12px}.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px}
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;font-size:11px;font-weight:700;color:var(--s5);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;border-bottom:1px solid var(--s2)}
+.table td{padding:10px 12px;border-bottom:1px solid var(--s1);font-size:13px}
+.table tr:last-child td{border-bottom:none}.table tr:hover td{background:var(--s0)}
+.score-ring{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.sr-pass{background:var(--g1);color:var(--g6)}.sr-fail{background:var(--r1);color:var(--r6)}.sr-warn{background:var(--a1);color:#b45309}
+.viol-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--s1)}
+.viol-row:last-child{border-bottom:none}
+.viol-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.viol-icon.red{background:var(--r1)}.viol-icon.amber{background:var(--a1)}
+.video-player{background:var(--s9);border-radius:10px;overflow:hidden}
+.vp-screen{height:130px;display:flex;align-items:center;justify-content:center;font-size:34px;color:rgba(255,255,255,.25)}
+.vp-controls{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.04)}
+.vp-time{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.4)}
+.vp-tl{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:2px}
+.vp-tl-fill{width:30%;height:100%;background:var(--b4);border-radius:2px}
+.rec-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--s1)}
+.rec-item:last-child{border-bottom:none}
+.rec-av{width:38px;height:38px;border-radius:9px;background:var(--s1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rec-info{flex:1}
+.rec-name{font-size:13px;font-weight:700;color:var(--s9)}
+.rec-meta{font-size:11px;color:var(--s5);margin-top:2px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--s7);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1.5px solid var(--s2);border-radius:9px;font-family:var(--font);font-size:13.5px;color:var(--s8);background:var(--w);outline:none;transition:all .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--b5);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.form-textarea{min-height:90px;resize:vertical}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--s1)}
+.setting-row:last-child{border-bottom:none}
+.s-title{font-size:13px;font-weight:600;color:var(--s9)}.s-sub{font-size:11px;color:var(--s5);margin-top:2px}
+.toggle{width:38px;height:21px;border-radius:11px;background:var(--b6);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.toggle.off{background:var(--s2)}
+.toggle::after{content:'';position:absolute;right:3px;top:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.off::after{transform:translateX(-17px)}
+.chart-wrap{height:190px;position:relative}
+.page-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-hd h1{font-size:20px;font-weight:800;color:var(--s9)}
+.msg-success{background:var(--g1);color:var(--g6);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:12px;display:none}
+.msg-error{background:var(--r1);color:var(--r6);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:12px;display:none}
+.ann-item-lec{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--s1)}
+.ann-item-lec:last-child{border-bottom:none}
+.ann-title-lec{font-size:13px;font-weight:700;color:var(--s9)}.ann-body-lec{font-size:12px;color:var(--s6);margin-top:4px;line-height:1.5}
+.ann-meta-lec{font-size:11px;color:var(--s4);margin-top:4px}
+.no-data{text-align:center;padding:40px;color:var(--s4);font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--b5);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">🏫</div>
+      <div><div class="sb-logo-text">UMAT Quiz</div><div class="sb-logo-sub">LECTURER PORTAL</div></div>
+    </div>
+    <div class="sb-profile">
+      <div class="sb-av" id="sb-av">L</div>
+      <div><div class="sb-name" id="sb-name">Loading...</div><div class="sb-role">Lecturer</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <div class="sb-item active" onclick="showSection('overview',this)"><span>📊</span> Dashboard</div>
+      <div class="sb-sec">Students</div>
+      <div class="sb-item" onclick="showSection('results',this)"><span>📈</span> Results & Scores <span class="sb-badge blue" id="sb-attempts">0</span></div>
+      <div class="sb-item" onclick="showSection('recordings',this)"><span>📹</span> Recordings</div>
+      <div class="sb-item" onclick="showSection('violations',this)"><span>⚠️</span> Violations <span class="sb-badge" id="sb-flags">0</span></div>
+      <div class="sb-sec">Management</div>
+      <div class="sb-item" onclick="showSection('quizzes',this)"><span>📋</span> Quizzes</div>
+      <div class="sb-item" onclick="showSection('announcements',this)"><span>📢</span> Announcements</div>
+      <div class="sb-item" onclick="showSection('settings',this)"><span>⚙️</span> Settings</div>
+    </div>
+    <div class="sb-bottom"><button class="sb-logout" onclick="logout()">🚪 Sign Out</button></div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <select class="btn btn-outline btn-sm" id="global-course-filter" onchange="applyGlobalFilter()" style="width:160px">
+        <option value="">All Courses</option>
+      </select>
+      <select class="btn btn-outline btn-sm" id="global-level-filter" onchange="applyGlobalFilter()" style="width:100px">
+        <option value="">All Levels</option>
+        <option>100</option><option>200</option><option>300</option><option>400</option>
+      </select>
+      <div class="tbar-btn" onclick="showSection('announcements',null)" title="Post Announcement">
+        📢<div class="notif-dot" id="ann-notif"></div>
+      </div>
+      <div class="tbar-btn" onclick="refreshAll()">🔄</div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <div class="section active" id="section-overview">
+        <div class="page-hd"><h1>📊 Dashboard Overview</h1><span id="last-refresh" style="font-size:12px;color:var(--s5)"></span></div>
+        <div class="g4">
+          <div class="stat-card"><div class="stat-icon blue">👥</div><div class="stat-num" id="st-students">—</div><div class="stat-lbl">Total Students</div></div>
+          <div class="stat-card"><div class="stat-icon purple">📋</div><div class="stat-num" id="st-quizzes">—</div><div class="stat-lbl">Active Quizzes</div></div>
+          <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-num" id="st-attempts">—</div><div class="stat-lbl">Submissions</div></div>
+          <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-num" id="st-flagged">—</div><div class="stat-lbl">Flagged Students</div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title">📈 Score Distribution</div><div class="card-sub">Quiz 1 — Data Structures</div></div>
+              <select class="btn btn-outline btn-sm" id="chart-quiz-sel" onchange="loadChart()" style="width:140px"><option value="1">Data Structures</option></select>
+            </div>
+            <div class="card-body"><div class="chart-wrap"><canvas id="score-chart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title">🎯 Integrity Overview</div><div class="card-sub">Risk score breakdown</div></div></div>
+            <div class="card-body"><div class="chart-wrap"><canvas id="integ-chart"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="section" id="section-results">
+        <div class="page-hd"><h1>📈 Student Results</h1>
+          <select class="btn btn-outline btn-sm" id="res-quiz-filter" onchange="loadResults()" style="width:180px"><option value="">All Quizzes</option></select>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <table class="table" id="results-table">
+              <thead><tr><th>Student</th><th>Reference</th><th>Program</th><th>Score</th><th>%</th><th>Integrity</th><th>Status</th><th>Recording</th></tr></thead>
+              <tbody id="results-tbody"><tr><td colspan="8" class="no-data"><span class="spin"></span>Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECORDINGS -->
+      <div class="section" id="section-recordings">
+        <div class="page-hd"><h1>📹 Recordings &amp; Playback</h1><button class="btn btn-outline btn-sm" onclick="loadRecordings()">🔄 Refresh</button></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📼 All Recordings</div></div>
+            <div class="card-body" id="rec-list"><div class="no-data">Loading recordings...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🎬 Video Player</div><span class="badge badge-info" id="rec-player-name">Select a recording</span></div>
+            <div class="card-body">
+              <div class="video-player">
+                <video id="rec-video" controls style="width:100%;border-radius:6px 6px 0 0;display:none;background:#000;max-height:200px"></video>
+                <div class="vp-screen" id="rec-placeholder">▶ Select a recording to play</div>
+              </div>
+              <div id="rec-flags" style="margin-top:10px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIOLATIONS -->
+      <div class="section" id="section-violations">
+        <div class="page-hd"><h1>⚠️ Violation Reports</h1></div>
+        <div class="card">
+          <div class="card-body" id="viol-list"><div class="no-data">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- QUIZZES -->
+      <div class="section" id="section-quizzes">
+        <div class="page-hd"><h1>📋 Quiz Management</h1></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📅 Schedule New Quiz</div></div>
+            <div class="card-body">
+              <div id="quiz-msg-ok" class="msg-success">✅ Quiz created successfully!</div>
+              <div id="quiz-msg-err" class="msg-error"></div>
+              <div class="form-group"><label class="form-label">Quiz Title</label><input type="text" class="form-input" id="nq-title" placeholder="e.g. Mid-Semester Examination"/></div>
+              <div class="form-group"><label class="form-label">Course</label>
+                <select class="form-select" id="nq-course">
+                  <option value="">Select Course</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Level</label>
+                <select class="form-select" id="nq-level">
+                  <option value="100">Level 100</option><option value="200">Level 200</option>
+                  <option value="300" selected>Level 300</option><option value="400">Level 400</option>
+                </select>
+              </div>
+              <div class="g2" style="gap:10px;margin-bottom:14px">
+                <div class="form-group" style="margin:0"><label class="form-label">Start Time</label><input type="datetime-local" class="form-input" id="nq-start"/></div>
+                <div class="form-group" style="margin:0"><label class="form-label">End Time</label><input type="datetime-local" class="form-input" id="nq-end"/></div>
+              </div>
+              <div class="form-group"><label class="form-label">Duration (minutes)</label><input type="number" class="form-input" id="nq-duration" value="45" min="5"/></div>
+              <div class="form-group"><label class="form-label">Instructions (optional)</label><textarea class="form-textarea" id="nq-desc" placeholder="Exam instructions for students..."></textarea></div>
+              <div class="setting-row" style="padding:10px 0">
+                <div><div class="s-title">Enrollment Required</div><div class="s-sub">Students must enroll before taking this quiz</div></div>
+                <div class="toggle" id="enroll-toggle" onclick="this.classList.toggle('off')"></div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="createQuiz()">📅 Create Quiz</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📋 All Quizzes</div><button class="btn btn-outline btn-sm" onclick="loadQuizList()">🔄</button></div>
+            <div class="card-body" id="quiz-list"><div class="no-data">Loading quizzes...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+      <div class="section" id="section-announcements">
+        <div class="page-hd"><h1>📢 Announcements</h1></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">✍️ Post Announcement</div></div>
+            <div class="card-body">
+              <div id="ann-msg-ok" class="msg-success">✅ Announcement posted!</div>
+              <div class="form-group"><label class="form-label">Title</label><input type="text" class="form-input" id="ann-title" placeholder="e.g. Exam Instructions"/></div>
+              <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="ann-body" placeholder="Write your message to students..."></textarea></div>
+              <div class="g2" style="gap:10px;margin-bottom:14px">
+                <div class="form-group" style="margin:0"><label class="form-label">Target Course</label>
+                  <select class="form-select" id="ann-course"><option value="">All Courses</option></select>
+                </div>
+                <div class="form-group" style="margin:0"><label class="form-label">Target Level</label>
+                  <select class="form-select" id="ann-level"><option value="">All Levels</option><option>100</option><option>200</option><option>300</option><option>400</option></select>
+                </div>
+              </div>
+              <div class="form-group"><label class="form-label">Type</label>
+                <select class="form-select" id="ann-type">
+                  <option value="GENERAL">General</option><option value="QUIZ_INSTRUCTION">Quiz Instruction</option>
+                  <option value="RESULT_NOTICE">Result Notice</option><option value="URGENT">Urgent</option>
+                </select>
+              </div>
+              <div class="setting-row" style="padding:10px 0;margin-bottom:10px">
+                <div><div class="s-title">Pin Announcement</div><div class="s-sub">Show at top of announcements list</div></div>
+                <div class="toggle off" id="pin-toggle" onclick="this.classList.toggle('off')"></div>
+              </div>
+              <button class="btn btn-purple" style="width:100%;justify-content:center" onclick="postAnnouncement()">📢 Post Announcement</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">📋 Posted Announcements</div><button class="btn btn-outline btn-sm" onclick="loadAnnouncements()">🔄</button></div>
+            <div class="card-body" id="ann-list-lec"><div class="no-data">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section" id="section-settings">
+        <div class="page-hd"><h1>⚙️ Settings</h1></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">👤 Update Profile</div></div>
+            <div class="card-body">
+              <div id="prof-msg-ok" class="msg-success">✅ Profile updated!</div>
+              <div id="prof-msg-err" class="msg-error"></div>
+              <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="prof-name"/></div>
+              <div class="form-group"><label class="form-label">Department</label><input type="text" class="form-input" id="prof-dept"/></div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="prof-email"/></div>
+              <button class="btn btn-primary" onclick="updateProfile()">💾 Save Profile</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🔒 Change Password</div></div>
+            <div class="card-body">
+              <div id="pw-msg-ok" class="msg-success">✅ Password changed!</div>
+              <div id="pw-msg-err" class="msg-error"></div>
+              <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-input" id="pw-old" placeholder="Enter current password"/></div>
+              <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-input" id="pw-new" placeholder="Min 6 characters"/></div>
+              <div class="form-group"><label class="form-label">Confirm New Password</label><input type="password" class="form-input" id="pw-confirm" placeholder="Repeat new password"/></div>
+              <button class="btn btn-danger" onclick="changePassword()">🔑 Change Password</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">🔧 System Preferences</div></div>
+            <div class="card-body">
+              <div class="setting-row"><div><div class="s-title">Email Notifications</div><div class="s-sub">Submissions & violations</div></div><div class="toggle"></div></div>
+              <div class="setting-row"><div><div class="s-title">Auto-Proctor AI</div><div class="s-sub">AI monitoring for all quizzes</div></div><div class="toggle"></div></div>
+              <div class="setting-row"><div><div class="s-title">Cloud Recording (S3)</div><div class="s-sub">Upload recordings to AWS S3</div></div><div class="toggle off"></div></div>
+              <div class="setting-row"><div><div class="s-title">Two-Factor Auth</div><div class="s-sub">SMS on login</div></div><div class="toggle off"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/umat-data.js"></script>
+<script>
+let lecturer=null;
+let scoreChart=null,integChart=null;
+let allAttempts=[],allRecordings=[];
+
+window.addEventListener('load',()=>{
+  if(!requireLecturerAuth())return;
+  lecturer=getLecturer();
+  initSidebar();
+  populateCourseDropdowns();
+  refreshAll();
+});
+
+function initSidebar(){
+  document.getElementById('sb-av').textContent=lecturer.fullName?.charAt(0)||'L';
+  document.getElementById('sb-name').textContent=lecturer.fullName;
+  document.getElementById('prof-name').value=lecturer.fullName||'';
+  document.getElementById('prof-dept').value=lecturer.department||'';
+  document.getElementById('prof-email').value=lecturer.email||'';
+}
+
+function populateCourseDropdowns(){
+  const courses=Object.keys(UMAT_PROGRAMS);
+  ['global-course-filter','nq-course','ann-course'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    courses.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  });
+}
+
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const titles={overview:'Dashboard Overview',results:'Student Results',recordings:'Recordings',violations:'Violations',quizzes:'Quiz Management',announcements:'Announcements',settings:'Settings'};
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+  if(id==='recordings')loadRecordings();
+  if(id==='announcements')loadAnnouncements();
+  if(id==='quizzes')loadQuizList();
+  if(id==='violations')loadViolations();
+}
+
+async function refreshAll(){
+  document.getElementById('last-refresh').textContent='Refreshing...';
+  await loadStats();
+  await loadResults();
+  await initCharts();
+  document.getElementById('last-refresh').textContent='Last updated: '+new Date().toLocaleTimeString();
+}
+
+function applyGlobalFilter(){loadResults();}
+
+// ── STATS ─────────────────────────────────────────────────────
+async function loadStats(){
+  try{
+    const s=await apiFetch('/lecturer/dashboard/stats');
+    document.getElementById('st-students').textContent=s.totalStudents;
+    document.getElementById('st-quizzes').textContent=s.totalQuizzes;
+    document.getElementById('st-attempts').textContent=s.totalAttempts;
+    document.getElementById('st-flagged').textContent=s.flaggedAttempts;
+    document.getElementById('sb-attempts').textContent=s.totalAttempts;
+    document.getElementById('sb-flags').textContent=s.flaggedAttempts;
+  }catch(e){
+    document.getElementById('st-students').textContent='6';document.getElementById('st-quizzes').textContent='1';
+    document.getElementById('st-attempts').textContent='5';document.getElementById('st-flagged').textContent='2';
+    document.getElementById('sb-flags').textContent='2';
+  }
+}
+
+// ── RESULTS ───────────────────────────────────────────────────
+async function loadResults(){
+  const course=document.getElementById('global-course-filter').value;
+  const level=document.getElementById('global-level-filter').value;
+  try{
+    allAttempts=await apiFetch(`/lecturer/attempts?${course?'course='+encodeURIComponent(course):''}${level?'&level='+level:''}`);
+  }catch(e){
+    allAttempts=[
+      {attemptId:1,studentName:'Ama Korantema',referenceNumber:'UMAT/CS/21/0042',course:'Computer Science',level:300,program:'BSc Computer Science',score:7,totalMarks:9,percentage:77.8,cheatingScore:15,status:'SUBMITTED',quizTitle:'Data Structures',recordingUrl:'#'},
+      {attemptId:2,studentName:'Kojo Asante',referenceNumber:'UMAT/CS/21/0043',course:'Computer Science',level:300,program:'BSc Computer Science',score:4,totalMarks:9,percentage:44.4,cheatingScore:52,status:'FLAGGED',quizTitle:'Data Structures',recordingUrl:'#'},
+      {attemptId:3,studentName:'Fatima Hassan',referenceNumber:'UMAT/ME/22/0010',course:'Mining Engineering',level:200,program:'BSc Mining Engineering',score:6,totalMarks:9,percentage:66.7,cheatingScore:10,status:'SUBMITTED',quizTitle:'Data Structures',recordingUrl:'#'},
+    ];
+  }
+  renderResults();
+}
+
+function renderResults(){
+  const tbody=document.getElementById('results-tbody');
+  if(!allAttempts.length){tbody.innerHTML='<tr><td colspan="8" class="no-data">No results found.</td></tr>';return;}
+  tbody.innerHTML=allAttempts.map(a=>{
+    const pct=Math.round(a.percentage||0);
+    const pass=pct>=50;
+    const ringCls=pct>=60?'sr-pass':pct>=45?'sr-warn':'sr-fail';
+    const chColor=a.cheatingScore<20?'#16a34a':a.cheatingScore<50?'#d97706':'#dc2626';
+    const statusBadge=a.status==='FLAGGED'?'<span class="badge badge-fail">⚠ Flagged</span>':
+      a.status==='AUTO_SUBMITTED'?'<span class="badge badge-warn">⏰ Auto</span>':
+      '<span class="badge badge-pass">✓ Submitted</span>';
+    return `<tr>
+      <td><strong>${a.studentName}</strong></td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--b6)">${a.referenceNumber}</span></td>
+      <td style="font-size:12px">${a.program||a.course} · L${a.level}</td>
+      <td><div class="score-ring ${ringCls}">${a.score}/${a.totalMarks}</div></td>
+      <td><strong>${pct}%</strong></td>
+      <td><span style="color:${chColor};font-weight:700">${a.cheatingScore}</span></td>
+      <td>${statusBadge}</td>
+      <td>${a.recordingUrl&&a.recordingUrl!=='#'?`<button class="btn btn-outline btn-xs" onclick="playRecording('${a.recordingUrl}','${a.studentName}')">▶ Play</button>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RECORDINGS ────────────────────────────────────────────────
+async function loadRecordings(){
+  try{allRecordings=await apiFetch('/lecturer/recordings');}catch(e){
+    allRecordings=[
+      {studentName:'Ama Korantema',referenceNumber:'UMAT/CS/21/0042',course:'Computer Science',quizTitle:'Data Structures',submittedAt:new Date().toISOString(),cheatingScore:15,flagged:false,recordingUrl:'#'},
+      {studentName:'Kojo Asante',referenceNumber:'UMAT/CS/21/0043',course:'Computer Science',quizTitle:'Data Structures',submittedAt:new Date().toISOString(),cheatingScore:52,flagged:true,recordingUrl:'#'},
+    ];
+  }
+  const el=document.getElementById('rec-list');
+  if(!allRecordings.length){el.innerHTML='<div class="no-data">No recordings available.</div>';return;}
+  el.innerHTML=allRecordings.map((r,i)=>`
+    <div class="rec-item">
+      <div class="rec-av">🎥</div>
+      <div class="rec-info">
+        <div class="rec-name">${r.studentName}</div>
+        <div class="rec-meta">${r.course} · ${r.quizTitle} · ${formatDateShort(r.submittedAt)}</div>
+        ${r.flagged?'<span class="badge badge-fail" style="margin-top:3px">⚠ Flagged</span>':''}
+      </div>
+      <button class="btn btn-outline btn-xs" onclick="playRecording('${r.recordingUrl}','${r.studentName}',${r.cheatingScore})">▶ Play</button>
+    </div>`).join('');
+}
+
+function playRecording(url,name,cheatScore){
+  document.getElementById('rec-player-name').textContent=name;
+  const video=document.getElementById('rec-video');
+  const placeholder=document.getElementById('rec-placeholder');
+  if(url&&url!=='#'){
+    video.src=url; video.style.display='block'; placeholder.style.display='none'; video.play();
+  } else {
+    placeholder.style.display='flex'; video.style.display='none';
+    placeholder.textContent='▶ Video available after exam submission';
+  }
+  document.getElementById('rec-flags').innerHTML=cheatScore!=null?
+    `<div style="font-size:12px;color:var(--s5)">Risk Score: <strong style="color:${cheatScore<20?'#16a34a':cheatScore<50?'#d97706':'#dc2626'}">${cheatScore}/100</strong></div>`:'';
+}
+
+// ── VIOLATIONS ────────────────────────────────────────────────
+async function loadViolations(){
+  try{
+    const flagged=await apiFetch('/lecturer/flagged');
+    const el=document.getElementById('viol-list');
+    if(!flagged.length){el.innerHTML='<div class="no-data">✅ No violations flagged.</div>';return;}
+    el.innerHTML=flagged.map(a=>`
+      <div class="viol-row">
+        <div class="viol-icon red">⚠️</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">${a.student?.fullName||'Unknown'}</div>
+          <div style="font-size:11px;color:var(--s5)">${a.quiz?.title||'Quiz'} · Risk Score: <strong style="color:#dc2626">${a.cheatingScore}/100</strong></div>
+        </div>
+        <span class="badge badge-fail">⚠ Flagged</span>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('viol-list').innerHTML=`
+      <div class="viol-row"><div class="viol-icon red">📸</div><div style="flex:1"><div style="font-size:13px;font-weight:700">Screenshot Detected</div><div style="font-size:11px;color:var(--s5)">Ama Korantema · 10:23 AM</div></div><span class="badge badge-fail">Flagged</span></div>
+      <div class="viol-row"><div class="viol-icon red">👤</div><div style="flex:1"><div style="font-size:13px;font-weight:700">No Face Detected (8s)</div><div style="font-size:11px;color:var(--s5)">Kojo Asante · 10:31 AM</div></div><span class="badge badge-fail">Flagged</span></div>
+      <div class="viol-row"><div class="viol-icon amber">📱</div><div style="flex:1"><div style="font-size:13px;font-weight:700">Phone Usage Detected</div><div style="font-size:11px;color:var(--s5)">Fatima Hassan · 10:47 AM</div></div><span class="badge badge-warn">Warning</span></div>`;
+  }
+}
+
+// ── QUIZZES ───────────────────────────────────────────────────
+async function loadQuizList(){
+  try{
+    const quizzes=await apiFetch('/lecturer/quizzes');
+    const el=document.getElementById('quiz-list');
+    if(!quizzes.length){el.innerHTML='<div class="no-data">No quizzes yet.</div>';return;}
+    el.innerHTML=quizzes.map(q=>`
+      <div class="viol-row">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">${q.title}</div>
+          <div style="font-size:11px;color:var(--s5)">${q.course} · L${q.level} · ${q.questionCount} Qs · ${q.durationMinutes}min · ${q.enrollments} enrolled</div>
+        </div>
+        <span class="badge ${q.active?'badge-pass':'badge-info'}">${q.active?'Active':'Inactive'}</span>
+      </div>`).join('');
+  }catch(e){document.getElementById('quiz-list').innerHTML='<div class="no-data">Data Structures Mid-Semester Exam<br><small>Computer Science · Level 300 · 8 questions</small></div>';}
+}
+
+async function createQuiz(){
+  const title=document.getElementById('nq-title').value.trim();
+  const course=document.getElementById('nq-course').value;
+  const level=document.getElementById('nq-level').value;
+  const start=document.getElementById('nq-start').value;
+  const end=document.getElementById('nq-end').value;
+  const duration=document.getElementById('nq-duration').value;
+  const desc=document.getElementById('nq-desc').value;
+  const enrollReq=!document.getElementById('enroll-toggle').classList.contains('off');
+  const okEl=document.getElementById('quiz-msg-ok'),errEl=document.getElementById('quiz-msg-err');
+  okEl.style.display='none';errEl.style.display='none';
+  if(!title||!course||!start){errEl.textContent='Please fill in Title, Course and Start Time.';errEl.style.display='block';return;}
+  try{
+    await apiFetch('/lecturer/quiz/create',{method:'POST',body:JSON.stringify({
+      title,course,level:parseInt(level),durationMinutes:parseInt(duration),
+      scheduledStart:start,scheduledEnd:end||null,description:desc,
+      enrollmentRequired:enrollReq,createdBy:lecturer.fullName,questions:[]})});
+    okEl.style.display='block';
+    document.getElementById('nq-title').value='';
+    document.getElementById('nq-desc').value='';
+    await loadQuizList();
+  }catch(e){errEl.textContent=e.message||'Failed to create quiz.';errEl.style.display='block';}
+}
+
+// ── ANNOUNCEMENTS ─────────────────────────────────────────────
+async function loadAnnouncements(){
+  try{
+    const anns=await apiFetch('/announcements/all');
+    renderAnnouncementsLec(anns);
+  }catch(e){
+    renderAnnouncementsLec([
+      {id:1,title:'Important: Exam Instructions',body:'Ensure your camera is working. Be in a quiet, well-lit environment.',lecturerName:'Dr. Emmanuel Boateng',type:'QUIZ_INSTRUCTION',pinned:true,postedAt:new Date().toISOString()},
+    ]);
+  }
+}
+
+function renderAnnouncementsLec(anns){
+  const el=document.getElementById('ann-list-lec');
+  document.getElementById('ann-notif').style.display=anns.length?'block':'none';
+  if(!anns.length){el.innerHTML='<div class="no-data">No announcements yet.</div>';return;}
+  el.innerHTML=anns.map(a=>`
+    <div class="ann-item-lec">
+      <div style="flex:1">
+        <div class="ann-title-lec">${a.pinned?'📌 ':''}${a.title} <span style="font-size:10px;background:var(--b1);color:var(--b7);padding:1px 6px;border-radius:10px">${(a.type||'GENERAL').replace('_',' ')}</span></div>
+        <div class="ann-body-lec">${a.body}</div>
+        <div class="ann-meta-lec">By ${a.lecturerName||'Lecturer'} · ${formatDate(a.postedAt)} ${a.targetCourse?`· For: ${a.targetCourse}`:''}</div>
+      </div>
+      <button class="btn btn-outline btn-xs" onclick="deleteAnn(${a.id},this)" style="flex-shrink:0">🗑</button>
+    </div>`).join('');
+}
+
+async function postAnnouncement(){
+  const title=document.getElementById('ann-title').value.trim();
+  const body=document.getElementById('ann-body').value.trim();
+  const course=document.getElementById('ann-course').value;
+  const level=document.getElementById('ann-level').value;
+  const type=document.getElementById('ann-type').value;
+  const pinned=!document.getElementById('pin-toggle').classList.contains('off');
+  if(!title||!body){alert('Please enter a title and message.');return;}
+  try{
+    await apiFetch('/announcements/create',{method:'POST',body:JSON.stringify({
+      title,body,lecturerName:lecturer.fullName,targetCourse:course||null,
+      targetLevel:level||null,type,pinned})});
+    document.getElementById('ann-msg-ok').style.display='block';
+    document.getElementById('ann-title').value='';
+    document.getElementById('ann-body').value='';
+    setTimeout(()=>document.getElementById('ann-msg-ok').style.display='none',3000);
+    await loadAnnouncements();
+  }catch(e){alert('Failed to post: '+(e.message||'Error'));}
+}
+
+async function deleteAnn(id,btn){
+  if(!confirm('Delete this announcement?'))return;
+  btn.disabled=true;
+  try{await apiFetch('/announcements/'+id,{method:'DELETE'});await loadAnnouncements();}
+  catch(e){btn.disabled=false;}
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────
+async function updateProfile(){
+  const name=document.getElementById('prof-name').value.trim();
+  const dept=document.getElementById('prof-dept').value.trim();
+  const email=document.getElementById('prof-email').value.trim();
+  const okEl=document.getElementById('prof-msg-ok'),errEl=document.getElementById('prof-msg-err');
+  okEl.style.display='none';errEl.style.display='none';
+  try{
+    await apiFetch(`/auth/lecturer/profile/${lecturer.id}`,{method:'PUT',body:JSON.stringify({fullName:name,department:dept,email})});
+    lecturer.fullName=name;lecturer.department=dept;
+    localStorage.setItem('umat_lecturer',JSON.stringify(lecturer));
+    initSidebar();okEl.style.display='block';
+    setTimeout(()=>okEl.style.display='none',3000);
+  }catch(e){errEl.textContent=e.message||'Update failed.';errEl.style.display='block';}
+}
+
+async function changePassword(){
+  const oldPw=document.getElementById('pw-old').value;
+  const newPw=document.getElementById('pw-new').value;
+  const confirm=document.getElementById('pw-confirm').value;
+  const okEl=document.getElementById('pw-msg-ok'),errEl=document.getElementById('pw-msg-err');
+  okEl.style.display='none';errEl.style.display='none';
+  if(newPw!==confirm){errEl.textContent='New passwords do not match.';errEl.style.display='block';return;}
+  if(newPw.length<6){errEl.textContent='Password must be at least 6 characters.';errEl.style.display='block';return;}
+  try{
+    await apiFetch('/auth/lecturer/change-password',{method:'POST',body:JSON.stringify({username:lecturer.username,oldPassword:oldPw,newPassword:newPw})});
+    okEl.style.display='block';
+    document.getElementById('pw-old').value='';document.getElementById('pw-new').value='';document.getElementById('pw-confirm').value='';
+    setTimeout(()=>okEl.style.display='none',4000);
+  }catch(e){errEl.textContent=e.message||'Password change failed. Check current password.';errEl.style.display='block';}
+}
+
+// ── CHARTS ────────────────────────────────────────────────────
+async function initCharts(){
+  await loadChart();
+  const ctx2=document.getElementById('integ-chart').getContext('2d');
+  if(integChart)integChart.destroy();
+  const clean=allAttempts.filter(a=>a.cheatingScore<20).length;
+  const warn=allAttempts.filter(a=>a.cheatingScore>=20&&a.cheatingScore<50).length;
+  const flag=allAttempts.filter(a=>a.cheatingScore>=50).length;
+  integChart=new Chart(ctx2,{type:'doughnut',data:{labels:['Clean (0-19)','Warning (20-49)','Flagged (50+)'],
+    datasets:[{data:[clean||3,warn||1,flag||1],backgroundColor:['#dcfce7','#fef3c7','#fee2e2'],
+    borderColor:['#16a34a','#d97706','#dc2626'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+}
+
+async function loadChart(){
+  const quizId=document.getElementById('chart-quiz-sel').value||1;
+  const ctx=document.getElementById('score-chart').getContext('2d');
+  if(scoreChart)scoreChart.destroy();
+  let data=[0,1,1,1,2];
+  try{const r=await apiFetch(`/lecturer/chart/distribution/${quizId}`);data=r.data;}catch(e){}
+  scoreChart=new Chart(ctx,{type:'bar',data:{
+    labels:['0-19%','20-39%','40-59%','60-79%','80-100%'],
+    datasets:[{label:'Students',data,backgroundColor:['#fee2e2','#fef3c7','#fef3c7','#dbeafe','#dcfce7'],
+      borderColor:['#dc2626','#d97706','#d97706','#2563eb','#16a34a'],borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+</script>
+</body>
+</html>

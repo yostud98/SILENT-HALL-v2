@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Silent Hall — Result Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --b9:#0c1e4a;--b7:#1e4db7;--b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--b1:#dbeafe;--b0:#eff6ff;
+  --t6:#0d9488;--t5:#14b8a6;--t1:#ccfbf1;
+  --g6:#16a34a;--g5:#22c55e;--g1:#dcfce7;
+  --r6:#dc2626;--r5:#ef4444;--r1:#fee2e2;
+  --a5:#f59e0b;--a1:#fef3c7;
+  --s9:#0f172a;--s8:#1e293b;--s7:#334155;--s6:#475569;--s5:#64748b;--s4:#94a3b8;
+  --s2:#e2e8f0;--s1:#f1f5f9;--s0:#f8fafc;--w:#fff;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+  --sh:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);
+  --sh-lg:0 10px 25px -3px rgba(0,0,0,.1),0 4px 8px -2px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:#e8eef7;color:var(--s8);font-size:14px;min-height:100vh}
+
+/* ── TOP NAV ── */
+.topnav{background:var(--b9);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.topnav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.topnav-logo-ic{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--b5),var(--t5));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.topnav-logo-text{font-size:14px;font-weight:800;color:#fff}
+.topnav-sep{width:1px;height:24px;background:rgba(255,255,255,.15)}
+.topnav-title{font-size:13px;color:rgba(255,255,255,.6);font-weight:500}
+.topnav-back{margin-left:auto;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 14px;transition:all .15s;text-decoration:none}
+.topnav-back:hover{background:rgba(255,255,255,.08);color:#fff}
+
+/* ── LAYOUT ── */
+.page{max-width:860px;margin:0 auto;padding:28px 20px 60px}
+
+/* ── SUMMARY HEADER ── */
+.summary-card{background:var(--w);border-radius:16px;box-shadow:var(--sh-lg);padding:28px;margin-bottom:24px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.score-ring{width:96px;height:96px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:4px solid}
+.score-ring.pass{background:var(--g1);border-color:var(--g6);color:var(--g6)}
+.score-ring.fail{background:var(--r1);border-color:var(--r6);color:var(--r6)}
+.score-ring-pct{font-size:24px;font-weight:800;line-height:1}
+.score-ring-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.7;margin-top:2px}
+.summary-info{flex:1;min-width:200px}
+.summary-title{font-size:20px;font-weight:800;color:var(--s9);margin-bottom:4px}
+.summary-meta{font-size:12px;color:var(--s5);margin-bottom:16px}
+.summary-stats{display:flex;gap:16px;flex-wrap:wrap}
+.stat-chip{background:var(--s0);border:1.5px solid var(--s2);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px}
+.stat-chip-n{font-size:18px;font-weight:800;color:var(--s9)}
+.stat-chip-l{font-size:10px;color:var(--s5);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700}
+.status-badge.pass{background:var(--g1);color:var(--g6)}
+.status-badge.fail{background:var(--r1);color:var(--r6)}
+.integrity-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;background:var(--s1);color:var(--s6)}
+.integrity-badge.flagged{background:var(--a1);color:#b45309}
+
+/* ── SECTION HEADER ── */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-hd h2{font-size:16px;font-weight:800;color:var(--s9)}
+.section-hd-sub{font-size:12px;color:var(--s5)}
+.btn-explain-all{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--b5);border-radius:9px;background:var(--b0);color:var(--b6);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-explain-all:hover{background:var(--b1)}
+.btn-explain-all:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── QUESTION CARDS ── */
+.q-card{background:var(--w);border-radius:14px;box-shadow:var(--sh);margin-bottom:16px;overflow:hidden;border:2px solid var(--s2);transition:border-color .2s}
+.q-card.correct{border-color:#86efac}
+.q-card.wrong{border-color:#fca5a5}
+.q-card.unanswered{border-color:var(--s2)}
+.q-card-head{padding:16px 20px;display:flex;align-items:flex-start;gap:14px}
+.q-status-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:1px}
+.q-card.correct .q-status-icon{background:var(--g1)}
+.q-card.wrong .q-status-icon{background:var(--r1)}
+.q-card.unanswered .q-status-icon{background:var(--s1)}
+.q-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--s4);margin-bottom:4px}
+.q-text{font-size:14px;font-weight:600;color:var(--s9);line-height:1.55}
+.q-marks-tag{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--s1);color:var(--s5)}
+.q-card-body{padding:0 20px 16px 70px}
+.answer-row{display:flex;align-items:baseline;gap:10px;padding:5px 0;font-size:13px}
+.answer-row-lbl{font-weight:700;color:var(--s5);min-width:130px;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.answer-correct{color:var(--g6);font-weight:700}
+.answer-wrong{color:var(--r6);font-weight:700}
+.answer-na{color:var(--s4);font-style:italic}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 12px}
+.opt-pill{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;border:1.5px solid var(--s2);background:var(--s0)}
+.opt-pill.is-correct{border-color:var(--g6);background:var(--g1)}
+.opt-pill.is-student.not-correct{border-color:var(--r6);background:var(--r1)}
+.opt-letter{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;background:var(--s2);color:var(--s6)}
+.opt-pill.is-correct .opt-letter{background:var(--g6);color:#fff}
+.opt-pill.is-student.not-correct .opt-letter{background:var(--r6);color:#fff}
+.opt-text-val{font-size:12px;color:var(--s7);flex:1}
+.opt-tag{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.opt-tag-correct{background:var(--g6);color:#fff}
+.opt-tag-yours{background:var(--r6);color:#fff}
+
+/* ── AI EXPLAIN ── */
+.btn-explain{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid var(--b4);border-radius:8px;background:#fff;color:var(--b6);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-explain:hover{background:var(--b0);border-color:var(--b6)}
+.btn-explain:disabled{opacity:.5;cursor:not-allowed}
+.ai-explain-box{margin-top:12px;border-radius:10px;overflow:hidden;font-size:13px;line-height:1.7;display:none}
+.ai-explain-box.open{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.explain-correct-block{background:#f0fdf4;border-left:4px solid var(--g6);padding:14px 16px;color:#166534}
+.explain-wrong-block{background:#fef2f2;border-left:4px solid var(--r6);padding:14px 16px;color:#991b1b;margin-top:2px}
+.explain-lbl{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;opacity:.75;display:flex;align-items:center;gap:5px}
+.explain-loading{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--s1);color:var(--s5);font-size:13px}
+.explain-error{padding:14px 16px;background:var(--r1);color:var(--r6);font-size:13px}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--b6);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── EMPTY / LOADING ── */
+.page-loading{text-align:center;padding:80px 20px;color:var(--s5)}
+.page-loading-icon{font-size:44px;margin-bottom:14px}
+.page-loading p{font-size:14px;font-weight:500}
+.back-link{display:inline-flex;align-items:center;gap:7px;color:var(--b6);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:20px;text-decoration:none}
+.back-link:hover{text-decoration:underline}
+
+/* ── PROGRESS SUMMARY ── */
+.progress-bar-wrap{background:var(--s2);border-radius:20px;height:10px;overflow:hidden;margin-top:6px}
+.progress-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--g5),var(--t5));transition:width .6s ease}
+.progress-bar-fill.low{background:linear-gradient(90deg,var(--r5),var(--a5))}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a class="topnav-logo" href="dashboard.html">
+    <div class="topnav-logo-ic">🎓</div>
+    <span class="topnav-logo-text">Silent Hall</span>
+  </a>
+  <div class="topnav-sep"></div>
+  <span class="topnav-title">Result Details</span>
+  <a class="topnav-back" href="dashboard.html">← Back to Dashboard</a>
+</div>
+
+<div class="page">
+  <a class="back-link" href="dashboard.html">← All Results</a>
+
+  <!-- Loading state -->
+  <div id="page-loading" class="page-loading">
+    <div class="page-loading-icon"><span class="spin" style="width:40px;height:40px;border-width:4px"></span></div>
+    <p>Loading your result…</p>
+  </div>
+
+  <!-- Main content (hidden until loaded) -->
+  <div id="page-content" style="display:none">
+
+    <!-- Summary card -->
+    <div class="summary-card">
+      <div class="score-ring" id="score-ring">
+        <div class="score-ring-pct" id="score-pct">—</div>
+        <div class="score-ring-lbl">Score</div>
+      </div>
+      <div class="summary-info">
+        <div class="summary-title" id="quiz-title">—</div>
+        <div class="summary-meta" id="quiz-meta">—</div>
+        <div class="summary-stats">
+          <div class="stat-chip"><div class="stat-chip-n" id="stat-score">—</div><div class="stat-chip-l">Total Score</div></div>
+          <div class="stat-chip"><div class="stat-chip-n" id="stat-correct">—</div><div class="stat-chip-l">Correct</div></div>
+          <div class="stat-chip"><div class="stat-chip-n" id="stat-wrong">—</div><div class="stat-chip-l">Wrong</div></div>
+          <div class="stat-chip"><div class="stat-chip-n" id="stat-skipped">—</div><div class="stat-chip-l">Skipped</div></div>
+          <div class="stat-chip"><div class="stat-chip-n" id="stat-time">—</div><div class="stat-chip-l">Time Taken</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <span class="status-badge" id="status-badge">—</span>
+        <span class="integrity-badge" id="integrity-badge">—</span>
+      </div>
+    </div>
+
+    <!-- Score breakdown bar -->
+    <div style="background:var(--w);border-radius:14px;box-shadow:var(--sh);padding:20px 24px;margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:700;color:var(--s6)">Performance Breakdown</span>
+        <span style="font-size:12px;color:var(--s5)" id="breakdown-text">—</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="breakdown-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Questions section -->
+    <div class="section-hd">
+      <div>
+        <h2>📋 Question Review</h2>
+        <div class="section-hd-sub" id="q-count-label">— questions</div>
+      </div>
+      <button class="btn-explain-all" id="btn-explain-all" onclick="explainAll()">
+        🤖 Explain All Wrong Answers
+      </button>
+    </div>
+
+    <div id="questions-list"></div>
+
+  </div><!-- /page-content -->
+</div>
+
+<script src="js/umat-data.js"></script>
+<script>
+let attemptData = null;
+let student = null;
+
+window.addEventListener('load', async () => {
+  if (!requireStudentAuth()) return;
+  student = getStudent();
+
+  const attemptId = localStorage.getItem('sh_view_attempt');
+  if (!attemptId) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  try {
+    // Fetch full attempt details from my-results endpoint
+    const allResults = await apiFetch(`/quiz/my-results/${student.id}`);
+    attemptData = allResults.find(r => String(r.attemptId) === String(attemptId));
+    if (!attemptData) throw new Error('Attempt not found');
+    renderPage();
+  } catch(e) {
+    // Demo / offline fallback
+    console.warn('[Silent Hall] Using demo data:', e);
+    attemptData = makeDemoAttempt();
+    renderPage();
+  }
+});
+
+function makeDemoAttempt() {
+  return {
+    attemptId: 'demo',
+    quizTitle: 'Data Structures Mid-Semester Exam',
+    course: 'Computer Science',
+    level: 300,
+    score: 6,
+    totalMarks: 11,
+    percentage: 54.5,
+    passed: true,
+    submittedAt: new Date().toISOString(),
+    startedAt: new Date(Date.now() - 35 * 60000).toISOString(),
+    cheatingScore: 0,
+    questions: [
+      {questionId:1,questionText:'What is the time complexity of binary search?',optionA:'O(n)',optionB:'O(log n)',optionC:'O(n²)',optionD:'O(1)',correctAnswer:'B',studentAnswer:'B',isCorrect:true,marksAwarded:1,marks:1},
+      {questionId:2,questionText:'Which data structure uses LIFO order?',optionA:'Queue',optionB:'Array',optionC:'Stack',optionD:'Linked List',correctAnswer:'C',studentAnswer:'A',isCorrect:false,marksAwarded:0,marks:1},
+      {questionId:3,questionText:'What does DFS stand for in graph traversal?',optionA:'Data First Search',optionB:'Depth First Search',optionC:'Dynamic First Search',optionD:'Direct Fast Search',correctAnswer:'B',studentAnswer:'B',isCorrect:true,marksAwarded:1,marks:1},
+      {questionId:4,questionText:'A complete binary tree with n nodes has height approximately:',optionA:'n',optionB:'n/2',optionC:'log₂(n)',optionD:'n²',correctAnswer:'C',studentAnswer:'C',isCorrect:true,marksAwarded:2,marks:2},
+      {questionId:5,questionText:'Which sorting algorithm has the best average-case time complexity?',optionA:'Bubble Sort',optionB:'Insertion Sort',optionC:'Merge Sort',optionD:'Selection Sort',correctAnswer:'C',studentAnswer:'A',isCorrect:false,marksAwarded:0,marks:2},
+      {questionId:6,questionText:'Which data structure is best for a priority queue?',optionA:'Array',optionB:'Linked List',optionC:'Heap',optionD:'Stack',correctAnswer:'C',studentAnswer:'C',isCorrect:true,marksAwarded:2,marks:2},
+      {questionId:7,questionText:'Worst-case time complexity of QuickSort?',optionA:'O(n log n)',optionB:'O(n)',optionC:'O(n²)',optionD:'O(log n)',correctAnswer:'C',studentAnswer:null,isCorrect:false,marksAwarded:0,marks:2},
+      {questionId:8,questionText:'In a hash table, a collision means:',optionA:'Hash function error',optionB:'Two keys map to same index',optionC:'Table is full',optionD:'Empty slot',correctAnswer:'B',studentAnswer:'B',isCorrect:true,marksAwarded:1,marks:1}
+    ]
+  };
+}
+
+function renderPage() {
+  const d = attemptData;
+  const qs = d.questions || [];
+  const pct = Math.round(d.percentage || 0);
+  const correct = qs.filter(q => q.isCorrect).length;
+  const wrong = qs.filter(q => !q.isCorrect && q.studentAnswer).length;
+  const skipped = qs.filter(q => !q.studentAnswer).length;
+
+  // Calculate time taken
+  let timeTaken = '—';
+  if (d.startedAt && d.submittedAt) {
+    const diff = Math.round((new Date(d.submittedAt) - new Date(d.startedAt)) / 1000);
+    const m = Math.floor(diff / 60), s = diff % 60;
+    timeTaken = `${m}m ${s}s`;
+  }
+
+  // Score ring
+  const ring = document.getElementById('score-ring');
+  ring.className = `score-ring ${d.passed ? 'pass' : 'fail'}`;
+  document.getElementById('score-pct').textContent = pct + '%';
+
+  // Info
+  document.getElementById('quiz-title').textContent = d.quizTitle || '—';
+  document.getElementById('quiz-meta').textContent =
+    `${d.course || ''}  ·  Level ${d.level || '—'}  ·  Submitted ${formatDate(d.submittedAt)}`;
+
+  // Stats
+  document.getElementById('stat-score').textContent = `${d.score}/${d.totalMarks}`;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-skipped').textContent = skipped;
+  document.getElementById('stat-time').textContent = timeTaken;
+
+  // Badges
+  const statusBadge = document.getElementById('status-badge');
+  statusBadge.textContent = d.passed ? '✓ Passed' : '✗ Failed';
+  statusBadge.className = `status-badge ${d.passed ? 'pass' : 'fail'}`;
+
+  const intBadge = document.getElementById('integrity-badge');
+  const flagged = (d.cheatingScore || 0) > 30;
+  intBadge.textContent = flagged ? '⚠ Flagged for Review' : '✓ Integrity Clean';
+  intBadge.className = `integrity-badge ${flagged ? 'flagged' : ''}`;
+
+  // Progress bar
+  document.getElementById('breakdown-text').textContent =
+    `${correct} correct · ${wrong} wrong · ${skipped} skipped`;
+  const bar = document.getElementById('breakdown-bar');
+  bar.style.width = pct + '%';
+  if (pct < 50) bar.classList.add('low');
+
+  // Q count label
+  document.getElementById('q-count-label').textContent =
+    `${qs.length} question${qs.length !== 1 ? 's' : ''}`;
+
+  // Render questions
+  document.getElementById('questions-list').innerHTML = qs.map((q, qi) => renderQCard(q, qi)).join('');
+
+  // Show / hide "explain all" button
+  const hasWrong = qs.some(q => !q.isCorrect);
+  if (!hasWrong) document.getElementById('btn-explain-all').style.display = 'none';
+
+  // Show content
+  document.getElementById('page-loading').style.display = 'none';
+  document.getElementById('page-content').style.display = 'block';
+}
+
+function renderQCard(q, qi) {
+  const cls = q.isCorrect ? 'correct' : (q.studentAnswer ? 'wrong' : 'unanswered');
+  const icon = q.isCorrect ? '✅' : (q.studentAnswer ? '❌' : '⬜');
+  const optMap = {A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD};
+
+  const optionsHtml = ['A','B','C','D'].map(letter => {
+    const isCorrect = letter === q.correctAnswer;
+    const isStudent = letter === q.studentAnswer;
+    const notCorrect = isStudent && !isCorrect;
+    let cls2 = 'opt-pill';
+    if (isCorrect) cls2 += ' is-correct';
+    if (isStudent && notCorrect) cls2 += ' is-student not-correct';
+    let tag = '';
+    if (isCorrect && isStudent) tag = '<span class="opt-tag opt-tag-correct">✓ Your Answer · Correct</span>';
+    else if (isCorrect) tag = '<span class="opt-tag opt-tag-correct">✓ Correct</span>';
+    else if (isStudent) tag = '<span class="opt-tag opt-tag-yours">✗ Your Answer</span>';
+    return `<div class="${cls2}">
+      <div class="opt-letter">${letter}</div>
+      <div class="opt-text-val">${optMap[letter] || '—'}</div>
+      ${tag}
+    </div>`;
+  }).join('');
+
+  const marksHtml = q.isCorrect
+    ? `<span style="color:var(--g6);font-weight:700">+${q.marksAwarded} mark${q.marksAwarded !== 1 ? 's' : ''}</span>`
+    : `<span style="color:var(--r6);font-weight:700">+0 / ${q.marks} mark${q.marks !== 1 ? 's' : ''}</span>`;
+
+  const showExplain = !q.isCorrect || !q.studentAnswer;
+
+  return `<div class="q-card ${cls}" id="q-card-${qi}">
+    <div class="q-card-head">
+      <div class="q-status-icon">${icon}</div>
+      <div style="flex:1">
+        <div class="q-num">Question ${qi + 1}</div>
+        <div class="q-text">${q.questionText}</div>
+      </div>
+      <div class="q-marks-tag">${marksHtml}</div>
+    </div>
+    <div class="q-card-body">
+      <div class="options-grid">${optionsHtml}</div>
+      ${showExplain ? `<button class="btn-explain" id="explain-btn-${qi}" onclick="explainQuestion(${qi}, this)">
+        🤖 Explain with AI
+      </button>` : ''}
+      <div class="ai-explain-box" id="explain-box-${qi}"></div>
+    </div>
+  </div>`;
+}
+
+// ── ON-DEMAND AI EXPLANATION ─────────────────────────────────
+async function explainQuestion(qi, btn) {
+  const q = attemptData.questions[qi];
+  const box = document.getElementById('explain-box-' + qi);
+
+  // Toggle if already loaded
+  if (box.dataset.loaded === '1') {
+    const isOpen = box.classList.contains('open');
+    box.classList.toggle('open');
+    btn.innerHTML = isOpen ? '🤖 Explain with AI' : '▲ Hide Explanation';
+    return;
+  }
+
+  // Show loading state
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:12px;height:12px;border-top-color:var(--b6)"></span> Generating explanation…';
+  box.innerHTML = '<div class="explain-loading"><span class="spin"></span> AI is analysing this question…</div>';
+  box.classList.add('open');
+
+  try {
+    const res = await apiFetch('/ai/explain', {
+      method: 'POST',
+      body: JSON.stringify({
+        question: q.questionText,
+        options: {A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD},
+        correctAnswer: q.correctAnswer,
+        studentAnswer: q.studentAnswer || null,
+        course: attemptData.course || ''
+      })
+    });
+
+    box.innerHTML = `
+      <div class="explain-correct-block">
+        <div class="explain-lbl">💡 Why ${q.correctAnswer}) ${({A:q.optionA,B:q.optionB,C:q.optionC,D:q.optionD})[q.correctAnswer]} is correct</div>
+        <div>${res.correctExplanation || 'No explanation available.'}</div>
+      </div>
+      ${res.wrongExplanation ? `
+      <div class="explain-wrong-block">
+        <div class="explain-lbl">❌ Why your answer was incorrect</div>
+        <div>${res.wrongExplanation}</div>
+      </div>` : ''}
+    `;
+    box.dataset.loaded = '1';
+    btn.innerHTML = '▲ Hide Explanation';
+    btn.disabled = false;
+
+  } catch(e) {
+    // Offline fallback — generate client-side explanation note
+    const optMap = {A:q.optionA, B:q.optionB, C:q.optionC, D:q.optionD};
+    const correctText = optMap[q.correctAnswer];
+    const studentText = q.studentAnswer ? optMap[q.studentAnswer] : null;
+
+    box.innerHTML = `
+      <div class="explain-correct-block">
+        <div class="explain-lbl">💡 Correct Answer</div>
+        <div>Option ${q.correctAnswer}) <strong>${correctText}</strong> is the correct answer. Connect to the backend AI service for a detailed explanation.</div>
+      </div>
+      ${studentText && !q.isCorrect ? `
+      <div class="explain-wrong-block">
+        <div class="explain-lbl">❌ Your Answer</div>
+        <div>You selected ${q.studentAnswer}) <strong>${studentText}</strong>, which is not correct. Review your course material on this topic.</div>
+      </div>` : ''}
+    `;
+    box.dataset.loaded = '1';
+    btn.innerHTML = '▲ Hide Explanation';
+    btn.disabled = false;
+  }
+}
+
+// Explain all wrong/skipped answers sequentially
+async function explainAll() {
+  const btn = document.getElementById('btn-explain-all');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:12px;height:12px;border-top-color:var(--b6)"></span> Generating all explanations…';
+
+  const wrongIndices = (attemptData.questions || [])
+    .map((q, i) => ({q, i}))
+    .filter(({q}) => !q.isCorrect);
+
+  for (const {i} of wrongIndices) {
+    const qBtn = document.getElementById('explain-btn-' + i);
+    const box = document.getElementById('explain-box-' + i);
+    if (box && box.dataset.loaded !== '1' && qBtn) {
+      await explainQuestion(i, qBtn);
+      // Small delay between requests to avoid rate limiting
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🤖 Explain All Wrong Answers';
+}
+</script>
+</body>
+</html>

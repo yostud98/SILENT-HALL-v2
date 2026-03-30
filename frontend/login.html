@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Silent Hall — Login & Sign Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--b9:#0c1e4a;--b7:#1e4db7;--b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--b1:#dbeafe;--b0:#eff6ff;
+  --t6:#0d9488;--t5:#14b8a6;--g6:#16a34a;--g1:#dcfce7;--r6:#dc2626;--r1:#fee2e2;
+  --a5:#f59e0b;--a1:#fef3c7;
+  --s9:#0f172a;--s8:#1e293b;--s7:#334155;--s6:#475569;--s5:#64748b;--s4:#94a3b8;
+  --s2:#e2e8f0;--s1:#f1f5f9;--s0:#f8fafc;--w:#ffffff;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--b9);min-height:100vh;display:flex;
+  align-items:center;justify-content:center;overflow:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,.06) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(59,130,246,.06) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none}
+.orb1{width:420px;height:420px;background:radial-gradient(#3b82f6,transparent);top:-120px;left:-100px;opacity:.35}
+.orb2{width:320px;height:320px;background:radial-gradient(#14b8a6,transparent);bottom:-80px;right:-80px;opacity:.3}
+.wrap{position:relative;z-index:10;width:100%;max-width:480px;padding:20px}
+.logo{text-align:center;margin-bottom:28px}
+.logo-icon{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,var(--b5),var(--t5));
+  display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:14px;
+  box-shadow:0 0 36px rgba(59,130,246,.45)}
+.logo-name{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.logo-sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.card{background:var(--w);border-radius:20px;padding:32px;box-shadow:0 24px 48px rgba(0,0,0,.4);max-height:80vh;overflow-y:auto}
+.card-title{font-size:20px;font-weight:800;color:var(--s9);margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--s5);margin-bottom:18px}
+.mode-tabs{display:flex;gap:4px;background:var(--s1);border-radius:10px;padding:4px;margin-bottom:16px}
+.mode-tab{flex:1;padding:8px;border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;background:transparent;color:var(--s5)}
+.mode-tab.active{background:var(--w);color:var(--b7);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.tabs{display:flex;gap:4px;background:var(--s1);border-radius:10px;padding:4px;margin-bottom:18px}
+.tab{flex:1;padding:8px;border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;background:transparent;color:var(--s5)}
+.tab.active{background:var(--w);color:var(--b7);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+label{display:block;font-size:11px;font-weight:700;color:var(--s7);margin-bottom:5px;
+  letter-spacing:.3px;text-transform:uppercase}
+.input-wrap{position:relative;margin-bottom:11px}
+.input-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--s4)}
+input,select{width:100%;padding:11px 11px 11px 38px;border:1.5px solid var(--s2);border-radius:9px;
+  font-family:var(--font);font-size:13px;color:var(--s8);background:var(--w);
+  transition:all .15s;outline:none;appearance:none}
+input:focus,select:focus{border-color:var(--b5);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+input.err{border-color:var(--r6);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+input::placeholder{color:var(--s4);font-family:var(--font)}
+.hint{font-size:11px;color:var(--s5);margin-top:3px;margin-bottom:11px}
+.hint code{background:var(--b0);color:var(--b7);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:10px}
+.err-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--r1);
+  border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--r6);font-weight:600}
+.err-box.show{display:flex}
+.success-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--g1);
+  border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--g6);font-weight:600}
+.success-box.show{display:flex}
+.btn-submit{width:100%;padding:12px;border:none;border-radius:10px;background:var(--b6);color:#fff;
+  font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;
+  box-shadow:0 4px 14px rgba(37,99,235,.35);margin-top:6px}
+.btn-submit:hover:not(:disabled){background:var(--b7);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-link{background:none;border:none;color:var(--b6);cursor:pointer;font-family:var(--font);
+  font-size:13px;font-weight:600;padding:0;margin:10px 0;text-decoration:underline;transition:all .15s}
+.btn-link:hover{color:var(--b7)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.modal-content{background:var(--w);border-radius:16px;padding:28px;max-width:420px;width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative}
+.modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border:none;
+  background:var(--s1);border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;color:var(--s7)}
+.modal-close:hover{background:var(--s2);color:var(--s9)}
+.demo-info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:10px;
+  padding:10px 12px;margin-top:14px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.5}
+.demo-info strong{color:rgba(255,255,255,.95);font-family:var(--mono)}
+.footer-txt{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px}
+#student-panel,#lecturer-panel{display:none}
+#student-panel.show,#lecturer-panel.show{display:block}
+#student-signup,#lecturer-signup{display:none}
+#student-signup.show,#lecturer-signup.show{display:block}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-name">Silent Hall</div>
+    <div class="logo-sub">AI-Proctored Examinations · Tarkwa</div>
+  </div>
+  <div class="card">
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('signin',this)">🔐 Sign In</button>
+      <button class="mode-tab" onclick="switchMode('signup',this)">✍️ Sign Up</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SIGN IN MODE -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div id="signin-mode">
+      <div class="card-title">Sign In</div>
+      <div class="card-sub">Access the examination portal</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchRole('student','signin',this)">🎓 Student</button>
+        <button class="tab" onclick="switchRole('lecturer','signin',this)">👨‍🏫 Lecturer</button>
+      </div>
+      <div class="err-box" id="err-box"><span>⚠️</span><span id="err-text"></span></div>
+
+      <!-- STUDENT SIGN IN -->
+      <div id="student-panel" class="show">
+        <label>UMAT Reference Number</label>
+        <div class="input-wrap">
+          <span class="input-icon">🪪</span>
+          <input type="text" id="ref-input" placeholder="UMAT/CS/21/0042" autocomplete="off"
+            spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')studentLogin()"/>
+        </div>
+        <div class="hint">Format: <code>UMAT/DEPT/YY/NNNN</code></div>
+        <label>Password (optional for first-time login)</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="student-pass" placeholder="Leave blank if not set yet"
+            onkeydown="if(event.key==='Enter')studentLogin()"/>
+        </div>
+        <button class="btn-submit" id="student-btn" onclick="studentLogin()">Sign In to Exam Portal</button>
+        <button class="btn-link" onclick="showModal('forgot-password-modal')">Forgot Password?</button>
+      </div>
+
+      <!-- LECTURER SIGN IN -->
+      <div id="lecturer-panel">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="lec-user" placeholder="Enter your username" autocomplete="off"/>
+        </div>
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="lec-pass" placeholder="Enter your password"
+            onkeydown="if(event.key==='Enter')lecturerLogin()"/>
+        </div>
+        <button class="btn-submit" id="lec-btn" onclick="lecturerLogin()">Sign In to Dashboard</button>
+        <button class="btn-link" onclick="showModal('forgot-password-modal')">Forgot Password?</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SIGN UP MODE -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div id="signup-mode" style="display:none">
+      <div class="card-title">Create Account</div>
+      <div class="card-sub">Join Silent Hall Exam System</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchRole('student','signup',this)">🎓 Student</button>
+        <button class="tab" onclick="switchRole('lecturer','signup',this)">👨‍🏫 Lecturer</button>
+      </div>
+      <div class="err-box" id="err-box-signup"><span>⚠️</span><span id="err-text-signup"></span></div>
+      <div class="success-box" id="success-box-signup"><span>✅</span><span id="success-text-signup"></span></div>
+
+      <!-- STUDENT SIGN UP -->
+      <div id="student-signup">
+        <label>UMAT Reference Number</label>
+        <div class="input-wrap">
+          <span class="input-icon">🪪</span>
+          <input type="text" id="ref-signup" placeholder="UMAT/CS/21/0042" autocomplete="off"
+            spellcheck="false" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+        <div class="hint">Format: <code>UMAT/DEPT/YY/NNNN</code></div>
+
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="fname-student" placeholder="Your full name"/>
+        </div>
+
+        <label>Email</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="email-student" placeholder="your.email@umat.edu.gh"/>
+        </div>
+
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="pass-student" placeholder="At least 6 characters"/>
+        </div>
+
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">✓</span>
+          <input type="password" id="pass-confirm-student" placeholder="Confirm password"/>
+        </div>
+
+        <button class="btn-submit" id="student-signup-btn" onclick="studentSignup()">Create Student Account</button>
+      </div>
+
+      <!-- LECTURER SIGN UP -->
+      <div id="lecturer-signup">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="user-lecturer" placeholder="Choose a username" autocomplete="off"/>
+        </div>
+
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="fname-lecturer" placeholder="Your full name"/>
+        </div>
+
+        <label>Department</label>
+        <div class="input-wrap">
+          <span class="input-icon">🏢</span>
+          <input type="text" id="dept-lecturer" placeholder="e.g. Computer Science"/>
+        </div>
+
+        <label>Email</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="email-lecturer" placeholder="your.email@umat.edu.gh"/>
+        </div>
+
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="pass-lecturer" placeholder="At least 6 characters"/>
+        </div>
+
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">✓</span>
+          <input type="password" id="pass-confirm-lecturer" placeholder="Confirm password"/>
+        </div>
+
+        <button class="btn-submit" id="lecturer-signup-btn" onclick="lecturerSignup()">Create Lecturer Account</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-info">
+    🧪 <strong>Demo Student:</strong> UMAT/CS/21/0042 (no password) &nbsp;|&nbsp;
+    <strong>Demo Lecturer:</strong> lecturer / umat2026
+  </div>
+  <div class="footer-txt">Silent Hall v2.0 · University of Mines &amp; Technology, Tarkwa</div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal" id="forgot-password-modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('forgot-password-modal')">✕</button>
+    <div class="card-title">Reset Password</div>
+    <div class="card-sub">Enter your email to receive a reset link</div>
+
+    <div class="tabs" id="forgot-tabs">
+      <button class="tab active" onclick="switchForgotRole('student',this)">🎓 Student</button>
+      <button class="tab" onclick="switchForgotRole('lecturer',this)">👨‍🏫 Lecturer</button>
+    </div>
+
+    <div class="err-box" id="forgot-err-box"><span>⚠️</span><span id="forgot-err-text"></span></div>
+    <div class="success-box" id="forgot-success-box"><span>✅</span><span id="forgot-success-text"></span></div>
+
+    <!-- Email Entry -->
+    <div id="forgot-email-step">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="forgot-email" placeholder="Enter your registered email"/>
+      </div>
+      <button class="btn-submit" onclick="sendPasswordReset()">Send Reset Link</button>
+    </div>
+
+    <!-- Token & New Password -->
+    <div id="forgot-token-step" style="display:none">
+      <label>Reset Token</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔑</span>
+        <input type="text" id="reset-token" placeholder="Paste the token from email/console"/>
+      </div>
+
+      <label>New Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="reset-new-pass" placeholder="At least 6 characters"/>
+      </div>
+
+      <label>Confirm Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">✓</span>
+        <input type="password" id="reset-confirm-pass" placeholder="Confirm new password"/>
+      </div>
+
+      <button class="btn-submit" onclick="resetPassword()">Reset Password</button>
+      <button class="btn-link" onclick="resetForgotForm()">Back to Email</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/umat-data.js"></script>
+<script>
+// ═════════════════════════════════════════════════════════════════════════════════
+// UI CONTROLS
+// ═════════════════════════════════════════════════════════════════════════════════
+
+function switchMode(mode,btn){
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('signin-mode').style.display = mode==='signin'?'block':'none';
+  document.getElementById('signup-mode').style.display = mode==='signup'?'block':'none';
+  hideErr(); hideSuccess();
+}
+
+function switchRole(role, mode, btn) {
+  const showClass = 'show';
+  document.querySelectorAll(`#${mode==='signin'?'signin':'signup'}-mode .tab`).forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  if(mode==='signin') {
+    document.getElementById('student-panel').classList.toggle(showClass, role==='student');
+    document.getElementById('lecturer-panel').classList.toggle(showClass, role==='lecturer');
+  } else {
+    document.getElementById('student-signup').classList.toggle(showClass, role==='student');
+    document.getElementById('lecturer-signup').classList.toggle(showClass, role==='lecturer');
+  }
+  hideErr(); hideSuccess();
+}
+
+function switchForgotRole(role,btn){
+  document.querySelectorAll('#forgot-tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  window.forgotRole = role;
+}
+
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); resetForgotForm(); }
+function hideErr() { document.getElementById('err-box')?.classList.remove('show'); }
+function hideSuccess() { document.getElementById('success-box-signup')?.classList.remove('show'); }
+function showErr(msg,id='err-box') { 
+  const textId = id.replace('err-box','err-text');
+  document.getElementById(textId).textContent = msg; 
+  document.getElementById(id).classList.add('show'); 
+}
+function showSuccess(msg,id='success-box-signup') { 
+  const textId = id.replace('success-box','success-text');
+  document.getElementById(textId).textContent = msg; 
+  document.getElementById(id).classList.add('show'); 
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════
+// SIGN IN FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════════════
+
+async function studentLogin() {
+  const ref = document.getElementById('ref-input').value.trim().toUpperCase();
+  const pass = document.getElementById('student-pass').value;
+  hideErr();
+  if (!ref) { showErr('Please enter your reference number.'); return; }
+  if (!/^UMAT\/[A-Z]{2,4}\/\d{2}\/\d{4}$/.test(ref)) {
+    showErr('Invalid format. Expected: UMAT/CS/21/0042');
+    return;
+  }
+  const btn = document.getElementById('student-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Verifying...';
+  try {
+    const data = await apiFetch('/auth/student/login', {
+      method:'POST', body: JSON.stringify({referenceNumber: ref, password: pass})
+    });
+    localStorage.setItem('umat_token', data.token);
+    localStorage.setItem('umat_student', JSON.stringify(data.student));
+    window.location.href = 'dashboard.html';
+  } catch(e) {
+    // Demo fallback
+    const demos = {'UMAT/CS/21/0042':{id:1,fullName:'Ama Korantema',program:'BSc Computer Science and Engineering',department:'Computer Science',course:'Computer Science',level:300,email:'ama@umat.edu.gh',referenceNumber:'UMAT/CS/21/0042',enrollmentDate:'2021-09-01',totalQuizzesTaken:3},
+      'UMAT/CS/21/0043':{id:2,fullName:'Kojo Asante',program:'BSc Computer Science and Engineering',department:'Computer Science',course:'Computer Science',level:300,email:'kojo@umat.edu.gh',referenceNumber:'UMAT/CS/21/0043',enrollmentDate:'2021-09-01',totalQuizzesTaken:1},
+      'UMAT/ME/22/0010':{id:4,fullName:'Fatima Hassan',program:'BSc Mining Engineering',department:'Mining Engineering',course:'Mining Engineering',level:200,email:'fatima@umat.edu.gh',referenceNumber:'UMAT/ME/22/0010',enrollmentDate:'2022-09-01',totalQuizzesTaken:0},
+      'UMAT/EE/20/0055':{id:5,fullName:'Emeka Eze',program:'BSc Electrical Engineering',department:'Electrical Engineering',course:'Electrical Engineering',level:400,email:'emeka@umat.edu.gh',referenceNumber:'UMAT/EE/20/0055',enrollmentDate:'2020-09-01',totalQuizzesTaken:2}};
+    if (demos[ref]) {
+      localStorage.setItem('umat_token','demo_token');
+      localStorage.setItem('umat_student', JSON.stringify(demos[ref]));
+      window.location.href = 'dashboard.html';
+    } else { showErr(e.message || 'Reference number not found. Try a demo account or sign up.'); }
+  } finally { btn.disabled=false; btn.innerHTML='Sign In to Exam Portal'; }
+}
+
+async function lecturerLogin() {
+  const username = document.getElementById('lec-user').value.trim();
+  const password = document.getElementById('lec-pass').value;
+  hideErr();
+  if (!username||!password){showErr('Enter username and password.');return;}
+  const btn=document.getElementById('lec-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Signing in...';
+  try {
+    const data = await apiFetch('/auth/lecturer/login', {method:'POST',body:JSON.stringify({username,password})});
+    localStorage.setItem('umat_token',data.token);
+    localStorage.setItem('umat_lecturer', JSON.stringify(data.lecturer));
+    window.location.href='lecturer-dashboard.html';
+  } catch(e) {
+    if (username==='lecturer'&&password==='umat2026') {
+      localStorage.setItem('umat_token','demo_lec_token');
+      localStorage.setItem('umat_lecturer',JSON.stringify({id:1,fullName:'Dr. Emmanuel Boateng',department:'Computer Science',email:'e.boateng@umat.edu.gh',username:'lecturer'}));
+      window.location.href='lecturer-dashboard.html';
+    } else { showErr(e.message||'Invalid credentials. Try: lecturer / umat2026'); }
+  } finally { btn.disabled=false; btn.innerHTML='Sign In to Dashboard'; }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════
+// SIGN UP FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════════════
+
+async function studentSignup() {
+  const ref = document.getElementById('ref-signup').value.trim().toUpperCase();
+  const fname = document.getElementById('fname-student').value.trim();
+  const email = document.getElementById('email-student').value.trim();
+  const pass = document.getElementById('pass-student').value;
+  const passConfirm = document.getElementById('pass-confirm-student').value;
+  
+  document.getElementById('err-box-signup').classList.remove('show');
+  
+  if (!ref) { showErr('Enter your reference number.','err-box-signup'); return; }
+  if (!/^UMAT\/[A-Z]{2,4}\/\d{2}\/\d{4}$/.test(ref)) { showErr('Invalid format: UMAT/CS/21/0042','err-box-signup'); return; }
+  if (!fname) { showErr('Enter your full name.','err-box-signup'); return; }
+  if (!email) { showErr('Enter your email.','err-box-signup'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.','err-box-signup'); return; }
+  if (pass !== passConfirm) { showErr('Passwords do not match.','err-box-signup'); return; }
+  
+  const btn = document.getElementById('student-signup-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Creating account...';
+  try {
+    const data = await apiFetch('/auth/student/signup', {
+      method:'POST',
+      body: JSON.stringify({referenceNumber: ref, fullName: fname, email, password: pass})
+    });
+    showSuccess(data.message,'success-box-signup');
+    setTimeout(()=> document.getElementById('student-pass').focus(), 500);
+  } catch(e) {
+    showErr(e.message || 'Sign up failed.','err-box-signup');
+  } finally { btn.disabled=false; btn.innerHTML='Create Student Account'; }
+}
+
+async function lecturerSignup() {
+  const username = document.getElementById('user-lecturer').value.trim();
+  const fname = document.getElementById('fname-lecturer').value.trim();
+  const dept = document.getElementById('dept-lecturer').value.trim();
+  const email = document.getElementById('email-lecturer').value.trim();
+  const pass = document.getElementById('pass-lecturer').value;
+  const passConfirm = document.getElementById('pass-confirm-lecturer').value;
+  
+  document.getElementById('err-box-signup').classList.remove('show');
+  
+  if (!username) { showErr('Choose a username.','err-box-signup'); return; }
+  if (username.length < 3) { showErr('Username must be at least 3 characters.','err-box-signup'); return; }
+  if (!fname) { showErr('Enter your full name.','err-box-signup'); return; }
+  if (!dept) { showErr('Enter your department.','err-box-signup'); return; }
+  if (!email) { showErr('Enter your email.','err-box-signup'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.','err-box-signup'); return; }
+  if (pass !== passConfirm) { showErr('Passwords do not match.','err-box-signup'); return; }
+  
+  const btn = document.getElementById('lecturer-signup-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Creating account...';
+  try {
+    const data = await apiFetch('/auth/lecturer/signup', {
+      method:'POST',
+      body: JSON.stringify({username, fullName: fname, department: dept, email, password: pass})
+    });
+    showSuccess(data.message,'success-box-signup');
+    setTimeout(()=> document.getElementById('lec-user').focus(), 500);
+  } catch(e) {
+    showErr(e.message || 'Sign up failed.','err-box-signup');
+  } finally { btn.disabled=false; btn.innerHTML='Create Lecturer Account'; }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════
+// PASSWORD RESET FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════════════
+
+let forgotRole = 'student';
+let resetTokenGlobal = '';
+
+function resetForgotForm() {
+  document.getElementById('forgot-email-step').style.display = 'block';
+  document.getElementById('forgot-token-step').style.display = 'none';
+  document.getElementById('forgot-email').value = '';
+  document.getElementById('reset-token').value = '';
+  document.getElementById('reset-new-pass').value = '';
+  document.getElementById('reset-confirm-pass').value = '';
+  document.getElementById('forgot-err-box').classList.remove('show');
+  document.getElementById('forgot-success-box').classList.remove('show');
+}
+
+async function sendPasswordReset() {
+  const email = document.getElementById('forgot-email').value.trim();
+  document.getElementById('forgot-err-box').classList.remove('show');
+  document.getElementById('forgot-success-box').classList.remove('show');
+  
+  if (!email) { showErr('Enter your email.','forgot-err-box'); return; }
+  const btn = event.target;
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Sending...';
+  
+  try {
+    const endpoint = `/auth/${forgotRole}/forgot-password`;
+    const data = await apiFetch(endpoint, {method:'POST', body: JSON.stringify({email})});
+    resetTokenGlobal = data.resetToken;
+    showSuccess('Token sent! Check console or paste the token below.','forgot-success-box');
+    console.log('Password Reset Token:', data.resetToken);
+    setTimeout(()=>{
+      document.getElementById('forgot-email-step').style.display = 'none';
+      document.getElementById('forgot-token-step').style.display = 'block';
+    }, 800);
+  } catch(e) {
+    showErr(e.message || 'Unable to send reset token.','forgot-err-box');
+  } finally { btn.disabled=false; btn.innerHTML='Send Reset Link'; }
+}
+
+async function resetPassword() {
+  const token = document.getElementById('reset-token').value.trim() || resetTokenGlobal;
+  const newPass = document.getElementById('reset-new-pass').value;
+  const confirmPass = document.getElementById('reset-confirm-pass').value;
+  
+  document.getElementById('forgot-err-box').classList.remove('show');
+  
+  if (!token) { showErr('Enter the reset token.','forgot-err-box'); return; }
+  if (newPass.length < 6) { showErr('Password must be at least 6 characters.','forgot-err-box'); return; }
+  if (newPass !== confirmPass) { showErr('Passwords do not match.','forgot-err-box'); return; }
+  
+  const btn = event.target;
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Resetting...';
+  
+  try {
+    const endpoint = `/auth/${forgotRole}/reset-password`;
+    const data = await apiFetch(endpoint, {
+      method:'POST',
+      body: JSON.stringify({resetToken: token, newPassword: newPass})
+    });
+    showSuccess(data.message || 'Password reset successfully! Login with your new password.','forgot-success-box');
+    setTimeout(()=> closeModal('forgot-password-modal'), 1500);
+  } catch(e) {
+    showErr(e.message || 'Password reset failed.','forgot-err-box');
+  } finally { btn.disabled=false; btn.innerHTML='Reset Password'; }
+}
+</script>
+</body>
+</html>

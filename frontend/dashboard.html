@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Silent Hall — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--b9:#0c1e4a;--b7:#1e4db7;--b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--b1:#dbeafe;--b0:#eff6ff;
+  --t6:#0d9488;--t5:#14b8a6;--t1:#ccfbf1;--g6:#16a34a;--g1:#dcfce7;
+  --r6:#dc2626;--r1:#fee2e2;--a5:#f59e0b;--a1:#fef3c7;
+  --s9:#0f172a;--s8:#1e293b;--s7:#334155;--s6:#475569;--s5:#64748b;--s4:#94a3b8;
+  --s2:#e2e8f0;--s1:#f1f5f9;--s0:#f8fafc;--w:#fff;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+  --sh:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:#e8eef7;color:var(--s8);font-size:14px;min-height:100vh}
+.app{display:flex;min-height:100vh}
+/* Sidebar */
+.sb{width:230px;background:var(--b9);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--b5),var(--t5));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:13px;font-weight:800;color:#fff;line-height:1.2}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.5px}
+.sb-profile{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.sb-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--b5),var(--t5));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.sb-name{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.sb-ref{font-size:10px;color:rgba(255,255,255,.4);font-family:var(--mono)}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.25);padding:10px 18px 4px;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.sb-item.active{background:rgba(59,130,246,.18);color:#fff;border-left-color:var(--b4)}
+.sb-badge{margin-left:auto;background:var(--r6);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px}
+.sb-bottom{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-logout{width:100%;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.6);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.sb-logout:hover{background:rgba(255,255,255,.08);color:#fff}
+/* Main */
+.main{flex:1;margin-left:230px;display:flex;flex-direction:column}
+.topbar{height:56px;background:var(--w);border-bottom:1px solid var(--s2);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:16px;font-weight:700;color:var(--s9);flex:1}
+.notif-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--s2);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;background:#fff;position:relative}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--r6);border:2px solid #fff}
+.content{flex:1;padding:24px}
+/* Sections */
+.section{display:none}
+.section.active{display:block}
+/* Profile card */
+.profile-grid{display:grid;grid-template-columns:280px 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.profile-grid{grid-template-columns:1fr}}
+.profile-card{background:var(--w);border-radius:16px;box-shadow:var(--sh);padding:28px;text-align:center}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--b5),var(--t5));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin:0 auto 16px}
+.profile-name{font-size:18px;font-weight:800;color:var(--s9);margin-bottom:4px}
+.profile-ref{font-family:var(--mono);font-size:12px;color:var(--b6);background:var(--b0);padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:16px}
+.profile-info-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--s1);font-size:12px}
+.profile-info-row:last-child{border:none}
+.profile-info-label{color:var(--s5);font-weight:600;text-transform:uppercase;letter-spacing:.4px;font-size:11px}
+.profile-info-value{color:var(--s8);font-weight:600;text-align:right}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-box{background:var(--w);border-radius:12px;box-shadow:var(--sh);padding:16px}
+.stat-icon{font-size:22px;margin-bottom:8px}
+.stat-num{font-size:24px;font-weight:800;color:var(--s9)}
+.stat-lbl{font-size:11px;color:var(--s5);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+/* Cards */
+.card{background:var(--w);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.card-hd{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13.5px;font-weight:700;color:var(--s9)}
+.card-sub{font-size:12px;color:var(--s5);margin-top:2px}
+.card-body{padding:0 20px 18px}
+/* Quiz cards */
+.quiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+.quiz-card{border:1.5px solid var(--s2);border-radius:12px;padding:18px;background:var(--w);position:relative;overflow:hidden;transition:all .18s}
+.quiz-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--b5),var(--t5))}
+.quiz-card.live::before{background:linear-gradient(90deg,#22c55e,var(--t5));animation:glow 2s infinite}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.6}}
+.quiz-card:hover{border-color:var(--b4);box-shadow:0 8px 24px rgba(37,99,235,.12);transform:translateY(-2px)}
+.qc-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px}
+.qc-badge.live{background:var(--g1);color:var(--g6)}
+.qc-badge.upcoming{background:var(--a1);color:#b45309}
+.qc-badge.expired{background:var(--s1);color:var(--s5)}
+.qc-badge.enrolled{background:var(--b1);color:var(--b7)}
+.qc-title{font-size:15px;font-weight:700;color:var(--s9);margin-bottom:6px}
+.qc-desc{font-size:12px;color:var(--s5);margin-bottom:10px;line-height:1.5}
+.qc-meta{display:flex;gap:12px;font-size:11px;color:var(--s5);margin-bottom:14px}
+.qc-foot{display:flex;align-items:center;justify-content:space-between}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-size:13px;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all .15s;padding:8px 14px;text-decoration:none}
+.btn-primary{background:var(--b6);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.btn-primary:hover{background:var(--b7)}
+.btn-success{background:var(--g6);color:#fff}
+.btn-success:hover{background:#15803d}
+.btn-outline{background:#fff;color:var(--s7);border:1.5px solid var(--s2)}
+.btn-outline:hover{background:var(--s0)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px}
+.btn-disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge-pass{background:var(--g1);color:var(--g6)}.badge-fail{background:var(--r1);color:var(--r6)}
+.badge-warn{background:var(--a1);color:#b45309}.badge-info{background:var(--b1);color:var(--b7)}
+/* Announcement cards */
+.ann-item{padding:14px 0;border-bottom:1px solid var(--s1)}
+.ann-item:last-child{border:none}
+.ann-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.ann-title{font-size:13px;font-weight:700;color:var(--s9)}
+.ann-body{font-size:12px;color:var(--s6);line-height:1.6}
+.ann-meta{font-size:11px;color:var(--s4);margin-top:5px}
+.ann-pin{font-size:10px;background:var(--a1);color:#b45309;padding:2px 7px;border-radius:20px;font-weight:700}
+.ann-type-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.ann-type-QUIZ_INSTRUCTION{background:var(--b1);color:var(--b7)}
+.ann-type-GENERAL{background:var(--s1);color:var(--s6)}
+.ann-type-URGENT{background:var(--r1);color:var(--r6)}
+.ann-type-RESULT_NOTICE{background:var(--g1);color:var(--g6)}
+/* Results */
+.result-item{border:1.5px solid var(--s2);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.result-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--s0);cursor:pointer}
+.result-title{font-size:14px;font-weight:700;color:var(--s9)}
+.result-score{font-size:22px;font-weight:800}
+.result-score.pass{color:var(--g6)}.result-score.fail{color:var(--r6)}
+.result-body{display:none;padding:16px}
+.q-review-item{padding:12px;border-radius:10px;margin-bottom:10px;border:1.5px solid var(--s2)}
+.q-review-item.correct{border-color:#86efac;background:#f0fdf4}
+.q-review-item.wrong{border-color:#fca5a5;background:#fef2f2}
+.q-review-item.unanswered{border-color:var(--s2);background:var(--s0)}
+.q-text-rev{font-size:13px;font-weight:600;color:var(--s9);margin-bottom:8px}
+.answer-line{font-size:12px;margin-bottom:4px}
+.answer-line .lbl{font-weight:700;min-width:120px;display:inline-block}
+.answer-line .correct-ans{color:var(--g6);font-weight:700}
+.answer-line .wrong-ans{color:var(--r6);font-weight:700}
+.ai-explain{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.6}
+.ai-explain.correct-exp{background:#f0fdf4;border-left:3px solid var(--g6);color:#15803d}
+.ai-explain.wrong-exp{background:#fef2f2;border-left:3px solid var(--r6);color:#b91c1c;margin-top:6px}
+.ai-explain-lbl{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+/* Page header */
+.page-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-hd h1{font-size:20px;font-weight:800;color:var(--s9)}
+/* Filter bar */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-lbl{font-size:12px;font-weight:700;color:var(--s6);text-transform:uppercase;letter-spacing:.4px}
+.filter-select{padding:7px 12px;border:1.5px solid var(--s2);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--s7);background:#fff;outline:none}
+.filter-select:focus{border-color:var(--b5)}
+.level-pills{display:flex;gap:6px}
+.level-pill{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--s2);color:var(--s6);background:#fff;transition:all .15s}
+.level-pill.active{background:var(--b6);color:#fff;border-color:var(--b6)}
+/* Empty state */
+.empty{text-align:center;padding:48px 20px;color:var(--s4)}
+.empty-icon{font-size:44px;margin-bottom:12px}
+.empty p{font-size:14px}
+/* Spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.12);border-top-color:var(--b6);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Toast notification */
+.sh-toast{position:fixed;top:20px;right:20px;z-index:99999;background:#fff;border-radius:12px;
+  padding:14px 20px;font-size:13px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.15);
+  transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:400px;
+  display:flex;align-items:center;gap:10px}
+.sh-toast.visible{transform:translateX(0)}
+.sh-toast-success{border-left:4px solid #16a34a;color:#15803d}
+.sh-toast-info{border-left:4px solid #2563eb;color:#1d4ed8}
+/* Explain button & AI explanation box */
+.btn-explain{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px solid var(--b4);border-radius:7px;background:#fff;color:var(--b6);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:10px}
+.btn-explain:hover{background:var(--b0);border-color:var(--b6)}
+.btn-explain:disabled{opacity:.5;cursor:not-allowed}
+.ai-explain-box{margin-top:10px;border-radius:10px;overflow:hidden;font-size:12px;line-height:1.65}
+.ai-explain-box.hidden{display:none}
+.explain-correct-block{background:#f0fdf4;border-left:3px solid var(--g6);padding:10px 14px;color:#15803d}
+.explain-wrong-block{background:#fef2f2;border-left:3px solid var(--r6);padding:10px 14px;color:#b91c1c;margin-top:4px}
+.explain-lbl{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;opacity:.8}
+.explain-loading{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--s1);color:var(--s5)}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">🎓</div>
+      <div><div class="sb-logo-text">Silent Hall</div><div class="sb-logo-sub">STUDENT PORTAL</div></div>
+    </div>
+    <div class="sb-profile">
+      <div class="sb-av" id="sb-av">A</div>
+      <div><div class="sb-name" id="sb-name">Loading...</div><div class="sb-ref" id="sb-ref">—</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-sec">Main</div>
+      <div class="sb-item active" onclick="showSection('profile',this)"><span>👤</span> My Profile</div>
+      <div class="sb-item" onclick="showSection('quizzes',this)"><span>📋</span> Available Exams</div>
+      <div class="sb-item" onclick="showSection('results',this)"><span>📊</span> My Results</div>
+      <div class="sb-item" onclick="showSection('announcements',this)">
+        <span>📢</span> Announcements <span class="sb-badge" id="ann-count" style="display:none">0</span>
+      </div>
+    </div>
+    <div class="sb-bottom"><button class="sb-logout" onclick="logout()">🚪 Sign Out</button></div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">My Profile</div>
+      <div class="notif-btn" onclick="showSection('announcements',null)" title="Announcements">
+        📢<div class="notif-dot" id="notif-dot" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── PROFILE ── -->
+      <div class="section active" id="section-profile">
+        <div class="page-hd"><h1>👤 My Profile</h1></div>
+        <div class="profile-grid">
+          <div class="profile-card">
+            <div class="profile-avatar" id="p-av">A</div>
+            <div class="profile-name" id="p-name">Loading...</div>
+            <div class="profile-ref" id="p-ref">—</div>
+            <div class="profile-info-row"><span class="profile-info-label">Program</span><span class="profile-info-value" id="p-program">—</span></div>
+            <div class="profile-info-row"><span class="profile-info-label">Department</span><span class="profile-info-value" id="p-dept">—</span></div>
+            <div class="profile-info-row"><span class="profile-info-label">Level</span><span class="profile-info-value" id="p-level">—</span></div>
+            <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-value" id="p-email" style="font-size:11px">—</span></div>
+            <div class="profile-info-row"><span class="profile-info-label">Enrolled Since</span><span class="profile-info-value" id="p-enrolled">—</span></div>
+          </div>
+          <div>
+            <div class="stats-grid" style="margin-bottom:16px">
+              <div class="stat-box"><div class="stat-icon">📝</div><div class="stat-num" id="s-taken">0</div><div class="stat-lbl">Quizzes Taken</div></div>
+              <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-num" id="s-passed">0</div><div class="stat-lbl">Passed</div></div>
+              <div class="stat-box"><div class="stat-icon">📈</div><div class="stat-num" id="s-avg">—</div><div class="stat-lbl">Avg Score</div></div>
+              <div class="stat-box"><div class="stat-icon">🎯</div><div class="stat-num" id="s-best">—</div><div class="stat-lbl">Best Score</div></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div><div class="card-title">📊 Score History</div><div class="card-sub">Your last quiz results</div></div></div>
+              <div class="card-body"><div style="height:160px;position:relative"><canvas id="score-hist-chart"></canvas></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── QUIZZES ── -->
+      <div class="section" id="section-quizzes">
+        <div class="page-hd">
+          <h1>📋 Available Examinations</h1>
+          <button class="btn btn-outline btn-sm" onclick="loadQuizzes()">🔄 Refresh</button>
+        </div>
+        <div style="background:var(--b0);border:1px solid var(--b1);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:18px">📷</span>
+          <div style="font-size:12px;color:var(--b7)"><strong>AI Proctoring is active.</strong> Your camera will be monitored during exams. Ensure you are in a quiet, well-lit room.</div>
+        </div>
+        <div class="filter-bar">
+          <span class="filter-lbl">Course:</span>
+          <select class="filter-select" id="q-course-filter" onchange="filterQuizzes()">
+            <option value="">All Courses</option>
+          </select>
+          <span class="filter-lbl">Level:</span>
+          <div class="level-pills">
+            <button class="level-pill active" onclick="setQLevel('',this)">All</button>
+            <button class="level-pill" onclick="setQLevel(100,this)">100</button>
+            <button class="level-pill" onclick="setQLevel(200,this)">200</button>
+            <button class="level-pill" onclick="setQLevel(300,this)">300</button>
+            <button class="level-pill" onclick="setQLevel(400,this)">400</button>
+          </div>
+        </div>
+        <div class="quiz-grid" id="quiz-grid"><div class="empty"><div class="empty-icon">📂</div><p>Loading exams...</p></div></div>
+      </div>
+
+      <!-- ── RESULTS ── -->
+      <div class="section" id="section-results">
+        <div class="page-hd"><h1>📊 My Results</h1><button class="btn btn-outline btn-sm" onclick="loadResults()">🔄 Refresh</button></div>
+        <div id="results-container"><div class="empty"><div class="empty-icon">📊</div><p>Loading results...</p></div></div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="section" id="section-announcements">
+        <div class="page-hd"><h1>📢 Announcements</h1><button class="btn btn-outline btn-sm" onclick="loadAnnouncements()">🔄 Refresh</button></div>
+        <div class="card">
+          <div class="card-body" id="ann-list" style="padding-top:16px">
+            <div class="empty"><div class="empty-icon">📢</div><p>Loading announcements...</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div>
+
+<script src="js/umat-data.js"></script>
+<script>
+let student = null;
+let allQuizzes = [];
+let selectedQLevel = '';
+let myResults = [];
+let scoreHistChart = null;
+
+window.addEventListener('load', () => {
+  if (!requireStudentAuth()) return;
+  student = getStudent();
+  initSidebar();
+  initProfile();
+  loadQuizzes();
+  loadAnnouncements();
+  loadResults();
+  // Handle post-submission redirect
+  const _params = new URLSearchParams(window.location.search);
+  if (_params.get('submitted') === '1') {
+    showToast('✅ <strong>Quiz submitted successfully!</strong> Your result has been saved.', 'success');
+    showSection('results', document.querySelector('.sb-item:nth-child(3)'));
+    history.replaceState({}, '', 'dashboard.html');
+  }
+});
+
+function initSidebar() {
+  document.getElementById('sb-av').textContent = student.fullName.charAt(0).toUpperCase();
+  document.getElementById('sb-name').textContent = student.fullName;
+  document.getElementById('sb-ref').textContent = student.referenceNumber;
+}
+
+function initProfile() {
+  document.getElementById('p-av').textContent = student.fullName.charAt(0).toUpperCase();
+  document.getElementById('p-name').textContent = student.fullName;
+  document.getElementById('p-ref').textContent = student.referenceNumber;
+  document.getElementById('p-program').textContent = student.program || '—';
+  document.getElementById('p-dept').textContent = student.department || '—';
+  document.getElementById('p-level').textContent = 'Level ' + (student.level || '—');
+  document.getElementById('p-email').textContent = student.email || '—';
+  document.getElementById('p-enrolled').textContent = formatDateShort(student.enrollmentDate);
+  document.getElementById('s-taken').textContent = student.totalQuizzesTaken || 0;
+  // Populate course filter with student's course first
+  const sel = document.getElementById('q-course-filter');
+  Object.keys(UMAT_PROGRAMS).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    if (c === student.course) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const titles = {profile:'My Profile',quizzes:'Available Examinations',results:'My Results',announcements:'Announcements'};
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+// ── QUIZZES ─────────────────────────────────────────────────
+async function loadQuizzes() {
+  const course = student.course || '';
+  const level = student.level || '';
+  try {
+    allQuizzes = await apiFetch(`/quiz/available?course=${encodeURIComponent(course)}&level=${level}&studentId=${student.id}`);
+  } catch(e) {
+    allQuizzes = [{id:1,title:'Data Structures Mid-Semester Exam',course:'Computer Science',level:300,
+      durationMinutes:45,questionCount:8,status:'LIVE',isLive:true,enrolled:false,attempted:false,
+      description:'Covers data structures Week 1–8.',enrollmentRequired:false,
+      scheduledStart:new Date(Date.now()-5*60000).toISOString(),scheduledEnd:new Date(Date.now()+2*60*60000).toISOString()}];
+  }
+  filterQuizzes();
+}
+
+function filterQuizzes() {
+  const course = document.getElementById('q-course-filter').value;
+  let filtered = allQuizzes;
+  if (course) filtered = filtered.filter(q=>q.course===course);
+  if (selectedQLevel) filtered = filtered.filter(q=>q.level==selectedQLevel);
+  renderQuizzes(filtered);
+}
+
+function setQLevel(level, btn) {
+  selectedQLevel = level;
+  document.querySelectorAll('.level-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  filterQuizzes();
+}
+
+function renderQuizzes(quizzes) {
+  const grid = document.getElementById('quiz-grid');
+  if (!quizzes.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>No exams found for your filters.</p></div>';
+    return;
+  }
+  grid.innerHTML = quizzes.map(q => {
+    const statusBadge = q.isLive
+      ? `<span class="qc-badge live">🟢 Live Now</span>`
+      : q.isUpcoming
+        ? `<span class="qc-badge upcoming">⏳ Starting ${formatDate(q.scheduledStart)}</span>`
+        : `<span class="qc-badge expired">⛔ Expired</span>`;
+
+    const enrollBadge = q.enrolled ? `<span class="qc-badge enrolled">✓ Enrolled</span>` : '';
+
+    let action = '';
+    if (q.attempted) {
+      action = `<span class="btn btn-outline btn-sm btn-disabled">✓ Submitted</span>`;
+    } else if (q.isLive && (q.enrolled || !q.enrollmentRequired)) {
+      action = `<button class="btn btn-success btn-sm" onclick="startExam(${q.id})">🚀 Start Exam</button>`;
+    } else if (q.isLive && !q.enrolled && q.enrollmentRequired) {
+      action = `<button class="btn btn-primary btn-sm" onclick="enrollNow(${q.id},this)">📝 Enroll Now</button>`;
+    } else if (q.isUpcoming && !q.enrolled && q.enrollmentRequired) {
+      action = `<button class="btn btn-outline btn-sm" onclick="enrollNow(${q.id},this)">📋 Pre-Enroll</button>`;
+    } else if (q.isUpcoming) {
+      action = `<span class="btn btn-outline btn-sm btn-disabled">⏰ Not Started</span>`;
+    } else {
+      action = `<span class="btn btn-outline btn-sm btn-disabled">⛔ Expired</span>`;
+    }
+
+    return `<div class="quiz-card ${q.isLive?'live':''}">
+      <div>${statusBadge} ${enrollBadge}</div>
+      <div class="qc-title">${q.title}</div>
+      ${q.description?`<div class="qc-desc">${q.description}</div>`:''}
+      <div class="qc-meta">
+        <span>⏱ ${q.durationMinutes} min</span>
+        <span>📝 ${q.questionCount||'?'} questions</span>
+        <span>📚 Level ${q.level}</span>
+      </div>
+      <div class="qc-foot">
+        <span style="font-size:11px;color:var(--s5)">${q.course}</span>
+        ${action}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function enrollNow(quizId, btn) {
+  btn.disabled=true; btn.textContent='Enrolling...';
+  try {
+    await apiFetch('/quiz/enroll',{method:'POST',body:JSON.stringify({studentId:student.id,quizId})});
+    await loadQuizzes();
+  } catch(e) {
+    // Demo: just reload
+    const q = allQuizzes.find(x=>x.id===quizId);
+    if (q) { q.enrolled=true; filterQuizzes(); }
+  }
+}
+
+function startExam(quizId) {
+  if (!confirm('⚠️ You are about to enter a PROCTORED exam.\n\n• Your camera will be enabled\n• Fullscreen will be locked\n• All violations are recorded\n\nAre you in a quiet, well-lit environment and ready to begin?')) return;
+  localStorage.setItem('umat_quiz_id', quizId);
+  window.location.href = 'exam.html';
+}
+
+// ── ANNOUNCEMENTS ────────────────────────────────────────────
+async function loadAnnouncements() {
+  try {
+    const anns = await apiFetch(`/announcements/student?course=${encodeURIComponent(student.course||'')}&level=${student.level||0}`);
+    renderAnnouncements(anns);
+  } catch(e) {
+    renderAnnouncements([
+      {id:1,title:'Important: Exam Instructions',body:'Ensure your camera is working. Be in a quiet, well-lit environment. No additional materials are allowed. Good luck!',lecturerName:'Dr. Emmanuel Boateng',type:'QUIZ_INSTRUCTION',pinned:true,postedAt:new Date().toISOString()},
+      {id:2,title:'Welcome to UMAT AI Quiz System',body:'This system uses AI proctoring. Your session is recorded. Any malpractice will be flagged for review.',lecturerName:'UMAT IT Department',type:'GENERAL',pinned:false,postedAt:new Date(Date.now()-86400000).toISOString()}
+    ]);
+  }
+}
+
+function renderAnnouncements(anns) {
+  const el = document.getElementById('ann-list');
+  if (!anns.length) { el.innerHTML='<div class="empty"><div class="empty-icon">📢</div><p>No announcements yet.</p></div>'; return; }
+  document.getElementById('ann-count').textContent = anns.length;
+  document.getElementById('ann-count').style.display = 'inline';
+  document.getElementById('notif-dot').style.display = 'block';
+  el.innerHTML = anns.map(a=>`
+    <div class="ann-item">
+      <div class="ann-top">
+        <div class="ann-title">${a.pinned?'📌 ':''}${a.title}</div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${a.pinned?'<span class="ann-pin">Pinned</span>':''}
+          <span class="ann-type-badge ann-type-${a.type}">${a.type?.replace('_',' ')||'General'}</span>
+        </div>
+      </div>
+      <div class="ann-body">${a.body}</div>
+      <div class="ann-meta">By ${a.lecturerName||'Lecturer'} · ${formatDate(a.postedAt)}</div>
+    </div>`).join('');
+}
+
+// ── RESULTS ──────────────────────────────────────────────────
+async function loadResults() {
+  try {
+    myResults = await apiFetch(`/quiz/my-results/${student.id}`);
+  } catch(e) {
+    myResults = [];
+  }
+  renderResults();
+  updateProfileStats();
+}
+
+function updateProfileStats() {
+  const taken = myResults.length;
+  const passed = myResults.filter(r=>r.passed).length;
+  const avg = taken ? Math.round(myResults.reduce((s,r)=>s+(r.percentage||0),0)/taken) : null;
+  const best = taken ? Math.round(Math.max(...myResults.map(r=>r.percentage||0))) : null;
+  document.getElementById('s-taken').textContent = taken;
+  document.getElementById('s-passed').textContent = passed;
+  document.getElementById('s-avg').textContent = avg !== null ? avg+'%' : '—';
+  document.getElementById('s-best').textContent = best !== null ? best+'%' : '—';
+  renderScoreHistChart();
+}
+
+function renderScoreHistChart() {
+  const ctx = document.getElementById('score-hist-chart').getContext('2d');
+  if (scoreHistChart) scoreHistChart.destroy();
+  const labels = myResults.map(r=>r.quizTitle.substring(0,18)+'…');
+  const data = myResults.map(r=>Math.round(r.percentage||0));
+  scoreHistChart = new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Score %',data,
+    backgroundColor:data.map(v=>v>=50?'rgba(22,163,74,.25)':'rgba(220,38,38,.25)'),
+    borderColor:data.map(v=>v>=50?'#16a34a':'#dc2626'),borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}});
+}
+
+function renderResults() {
+  const el = document.getElementById('results-container');
+  if (!myResults.length) {
+    el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><p>No quiz results yet. Take an exam to see your results here.</p></div>';
+    return;
+  }
+  el.innerHTML = myResults.map((r,ri)=>`
+    <div class="result-item">
+      <div class="result-hd" onclick="toggleResult(${ri})">
+        <div>
+          <div class="result-title">${r.quizTitle}</div>
+          <div style="font-size:11px;color:var(--s5);margin-top:3px">${r.course} · Level ${r.level} · ${formatDate(r.submittedAt)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="result-score ${r.passed?'pass':'fail'}">${Math.round(r.percentage||0)}%</div>
+          <span class="badge ${r.passed?'badge-pass':'badge-fail'}">${r.passed?'✓ Pass':'✗ Fail'}</span>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openResultDetail(${r.attemptId})" style="padding:6px 14px;font-size:12px">📋 View Details</button>
+          <span style="color:var(--s4);font-size:18px" id="ri-arrow-${ri}">▾</span>
+        </div>
+      </div>
+      <div class="result-body" id="result-body-${ri}">
+        <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+          <div><span style="font-size:11px;color:var(--s5);font-weight:700;text-transform:uppercase">Score</span><br><strong>${r.score}/${r.totalMarks}</strong></div>
+          <div><span style="font-size:11px;color:var(--s5);font-weight:700;text-transform:uppercase">Integrity</span><br><strong style="color:${r.cheatingScore>30?'#dc2626':'#16a34a'}">${r.cheatingScore<=30?'Clean':'⚠ Flagged'}</strong></div>
+          <button class="btn btn-primary btn-sm" onclick="openResultDetail(${r.attemptId})" style="margin-left:auto">📋 Full Details & AI Explanations →</button>
+        </div>
+        ${(r.questions||[]).map((q,qi)=>renderQuestionReviewCompact(q,qi,r.attemptId)).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleResult(ri) {
+  const body = document.getElementById('result-body-'+ri);
+  const arrow = document.getElementById('ri-arrow-'+ri);
+  const open = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  arrow.textContent = open?'▾':'▴';
+}
+
+function renderQuestionReviewCompact(q, qi, attemptId) {
+  const cls = q.isCorrect ? 'correct' : (q.studentAnswer ? 'wrong' : 'unanswered');
+  const statusIcon = q.isCorrect ? '✅' : (q.studentAnswer ? '❌' : '⬜');
+  const optMap = {A:q.optionA,B:q.optionB,C:q.optionC,D:q.optionD};
+  const correctText = optMap[q.correctAnswer] || q.correctAnswer;
+  const studentText = q.studentAnswer ? optMap[q.studentAnswer] : 'Not answered';
+  const uid = `${attemptId}-${qi}`;
+  return `<div class="q-review-item ${cls}">
+    <div class="q-text-rev">${statusIcon} Q${qi+1}: ${q.questionText}</div>
+    <div class="answer-line"><span class="lbl">Your Answer:</span>
+      <span class="${q.isCorrect?'correct-ans':'wrong-ans'}">${q.studentAnswer||'—'}: ${studentText}</span>
+      ${q.marksAwarded?`<span style="color:var(--g6);font-weight:700;margin-left:8px">+${q.marksAwarded}mk</span>`:''}
+    </div>
+    ${!q.isCorrect?`<div class="answer-line"><span class="lbl">Correct Answer:</span><span class="correct-ans">${q.correctAnswer}: ${correctText}</span></div>`:''}
+    <button class="btn-explain" id="exp-btn-${uid}" onclick="explainInDashboard('${uid}',${JSON.stringify(q).replace(/'/g,'\'')},this)">🤖 Explain with AI</button>
+    <div class="ai-explain-box hidden" id="exp-box-${uid}"></div>
+  </div>`;
+}
+
+function openResultDetail(attemptId) {
+  localStorage.setItem('sh_view_attempt', attemptId);
+  window.location.href = 'result-detail.html';
+}
+
+function showToast(msg, type='info') {
+  const existing = document.querySelector('.sh-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = `sh-toast sh-toast-${type}`;
+  t.innerHTML = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('visible'));
+  setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 400); }, 5000);
+}
+
+async function explainInDashboard(uid, q, btn) {
+  const box = document.getElementById('exp-box-' + uid);
+  if (box.dataset.loaded === '1') { box.classList.toggle('hidden'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:11px;height:11px;border-top-color:var(--b6)"></span> Generating…';
+  box.innerHTML = '<div class="explain-loading"><span class="spin" style="width:12px;height:12px;border-top-color:var(--b6)"></span> AI is thinking…</div>';
+  box.classList.remove('hidden');
+  try {
+    const res = await apiFetch('/ai/explain', {
+      method: 'POST',
+      body: JSON.stringify({
+        question: q.questionText,
+        options: {A:q.optionA,B:q.optionB,C:q.optionC,D:q.optionD},
+        correctAnswer: q.correctAnswer,
+        studentAnswer: q.studentAnswer || null,
+        course: student.course || ''
+      })
+    });
+    box.innerHTML = `
+      <div class="explain-correct-block"><div class="explain-lbl">💡 Why ${q.correctAnswer} is correct</div><div>${res.correctExplanation||''}</div></div>
+      ${res.wrongExplanation ? `<div class="explain-wrong-block"><div class="explain-lbl">❌ Why your answer was wrong</div><div>${res.wrongExplanation}</div></div>` : ''}
+    `;
+    box.dataset.loaded = '1';
+  } catch(e) {
+    box.innerHTML = '<div class="explain-loading" style="color:var(--r6)">⚠ Could not load explanation. Try again.</div>';
+    btn.disabled = false;
+  }
+  btn.innerHTML = '🤖 Explain with AI';
+}
+</script>
+</body>
+</html>
