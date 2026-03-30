@@ -1,0 +1,17 @@
+{
+  "name": "umat-ai-quiz-system",
+  "version": "1.0.0",
+  "description": "UMAT AI-powered proctored examination system",
+  "scripts": {
+    "backend": "cd backend && mvn spring-boot:run",
+    "frontend": "cd frontend && python3 -m http.server 3000",
+    "electron": "cd electron && npm start",
+    "electron:dev": "cd electron && npm run dev",
+    "ai:setup": "cd ai && pip install -r requirements.txt && python download_model.py",
+    "ai:start": "cd ai && python proctor.py",
+    "install:electron": "cd electron && npm install"
+  },
+  "keywords": ["umat", "quiz", "exam", "proctoring", "ai"],
+  "author": "UMAT IT Department",
+  "license": "MIT"
+}

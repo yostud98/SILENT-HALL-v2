@@ -1,0 +1,51 @@
+{
+  "name": "umat-quiz-secure-browser",
+  "version": "1.0.0",
+  "description": "UMAT AI Quiz System — Secure Electron Browser",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": ["umat", "quiz", "proctoring", "electron"],
+  "author": "UMAT IT Department",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  },
+  "build": {
+    "appId": "gh.edu.umat.quiz",
+    "productName": "UMAT Exam Browser",
+    "copyright": "© 2026 University of Mines and Technology",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "../frontend/**/*"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "../docs/assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "../docs/assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "../docs/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "runAfterFinish": true,
+      "installerIcon": "../docs/assets/icon.ico"
+    }
+  }
+}

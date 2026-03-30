@@ -1,0 +1,12 @@
+# UMAT AI Proctoring — Python Requirements
+# Install with: pip install -r requirements.txt
+
+opencv-python-headless>=4.8.0
+ultralytics>=8.0.0
+numpy>=1.24.0
+requests>=2.31.0
+Pillow>=10.0.0
+
+# Optional — for GPU acceleration
+# torch>=2.0.0
+# torchvision>=0.15.0

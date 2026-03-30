@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: umat_mysql
+    environment:
+      MYSQL_DATABASE: umat_quiz
+      MYSQL_ROOT_PASSWORD: Kwekufrimpong7
+      MYSQL_USER: umat_user
+      MYSQL_PASSWORD: umat_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: umat_backend
+    environment:
+      DATABASE_URL: "jdbc:mysql://mysql:3306/umat_quiz?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: Kwekufrimpong7
+      DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+      JWT_SECRET: "UMATQuizSystemSecretKey2026VeryLongAndSecureKeyForJWT"
+      SPRING_PROFILES_ACTIVE: "railway"
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+
+  # Frontend (Optional - for testing locally)
+  frontend:
+    image: nginx:latest
+    container_name: umat_frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  default:
+    name: umat_network
