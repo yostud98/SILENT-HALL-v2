@@ -5,6 +5,6 @@
   },
   "deploy": {
     "numReplicas": 1,
-    "startCommand": "java -Dserver.port=$PORT -jar app.jar"
+    "startCommand": "java -jar app.jar"
   }
 }
